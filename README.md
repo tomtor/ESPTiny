@@ -12,3 +12,5 @@ All components / features are optional:
 - Decoupling capacitors
 - I2C communication between ESP and Attiny
 - AtTiny can restart ESP by pulling ESP Reset low
+
+![Schema](schema.pdf)
