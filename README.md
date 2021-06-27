@@ -2,6 +2,8 @@
 
 ![3D rendering](ESPTiny.png)
 
+Usable on breadboard (9 rows high, leaves 3 rows empty) OR stand alone.
+
 All components / features are optional:
 
 - AtTiny84
