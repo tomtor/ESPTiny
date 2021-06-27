@@ -10,3 +10,5 @@ All components / features are optional:
 - BAT85 diode for Solar Charging panel
 - Voltage divider for measuring battery voltage
 - Decoupling capacitors
+- I2C communication between ESP and Attiny
+- AtTiny can restart ESP by pulling ESP Reset low
