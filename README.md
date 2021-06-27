@@ -6,6 +6,7 @@ All components / features are optional:
 
 - AtTiny84
 - ESP-01
+- LED with resistor
 - MCP1700 low quiescent current regulator
 - BAT85 diode for Solar Charging panel
 - Voltage divider for measuring battery voltage
