@@ -10,7 +10,7 @@ All components / features are optional:
 - ESP-01
 - LED with resistor
 - MCP1700 low quiescent current regulator
-- BAT85 diode for Solar Charging panel
+- BAT85 diode for Solar Charging panel (see https://www.thethingsnetwork.org/labs/story/a-cheap-stm32-arduino-node/step/solar-power#step-anchor)
 - Voltage divider for measuring battery voltage
 - Decoupling capacitors
 - I2C communication between ESP and Attiny
