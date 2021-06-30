@@ -16,4 +16,6 @@ All components / features are optional:
 - I2C communication between ESP and Attiny (with optional 4K7 pull-up)
 - AtTiny can restart ESP by pulling ESP Reset low
 
-![Schema](schema.pdf)
+![Schema (PDF)](schema.pdf)
+
+![Schema SVG](schema.svg)
