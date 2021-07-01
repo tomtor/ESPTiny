@@ -611,7 +611,7 @@ U 1 1 60DEB11A
 P 3600 4350
 F 0 "JP1" H 3600 4555 50  0000 C CNN
 F 1 "SolderJumper_2" H 3600 4464 50  0000 C CNN
-F 2 "" H 3600 4350 50  0001 C CNN
+F 2 "Jumper:SolderJumper-2_P1.3mm_Bridged_RoundedPad1.0x1.5mm" H 3600 4350 50  0001 C CNN
 F 3 "~" H 3600 4350 50  0001 C CNN
 	1    3600 4350
 	1    0    0    -1  
