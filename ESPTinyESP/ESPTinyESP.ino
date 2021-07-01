@@ -95,6 +95,7 @@ void setup() {
 
   //I2C stuff
   Wire.begin(0, 2);
+  //Wire.setClock(10000);
 }
 
 

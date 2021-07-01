@@ -157,26 +157,23 @@ void setup() {
   }
 
   sleepDelay(4096);
-
-//  TinyWire.begin(1);                // join i2c bus with address #1
-//  TinyWire.onRequest(requestEvent); // register event
 }
 
 
 unsigned voltage;
 
-unsigned cnt;
+volatile unsigned cnt;
 
 // function that executes whenever data is requested by master
 // this function is registered as an event, see setup()
 void requestEvent() {
-  ++cnt;
-  
   // TinyWire.send("hi!!", 4); // respond with message of 4 bytes
   TinyWire.send(cnt >> 8);
   TinyWire.send(cnt & 0xFF);
   TinyWire.send(voltage >> 8);
   TinyWire.send(voltage & 0xFF);
+
+  ++cnt;
 }
 
 
@@ -188,7 +185,7 @@ void loop() {
   sleepDelay(1024);
   blinkN((v % 1000) / 100);
 
-  for (int l = 0; l < 75; l++) {
+  for (int l = 0; l < 50; l++) {
     sleepDelay(8192);
     blinkN(1);
   }
@@ -198,11 +195,16 @@ void loop() {
   sleepDelay(32);
   pinMode(reset_ESP, INPUT);
 
-  delay(1000);
+  delay(3000);
+  
+  auto startcnt = cnt;
 
   TinyWire.begin(1);                // join i2c bus with address #1
   TinyWire.onRequest(requestEvent); // register event
   
-  delay(4000);
+  auto end = millis() + 4000;
+  while (cnt == startcnt && millis() < end)
+    ;
+  delay(200);
   TinyWire.end();
 }
