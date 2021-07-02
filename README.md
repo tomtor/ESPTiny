@@ -13,7 +13,7 @@ All components / features are optional:
 - BAT85 diode for Solar Charging panel (see https://www.thethingsnetwork.org/labs/story/a-cheap-stm32-arduino-node/step/solar-power)
 - Voltage divider for measuring battery voltage
 - Decoupling capacitors
-- I2C communication between ESP and Attiny (with optional 4K7 pull-up)
+- I2C communication between ESP and Attiny (with optional 4k7 pull-up)
 - AtTiny can restart ESP by pulling ESP Reset low
 
 ![Schema (PDF)](schema.pdf)
