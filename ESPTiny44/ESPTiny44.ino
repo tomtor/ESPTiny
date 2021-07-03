@@ -3,9 +3,6 @@
 
 #include <TinyWire.h>
 
-//#define BODS 7                   //BOD Sleep bit in MCUCR
-//#define BODSE 2                  //BOD Sleep enable bit in MCUCR
-
 #include <avr/sleep.h>
 #include <avr/wdt.h>
 #include <avr/power.h>
@@ -20,23 +17,15 @@
 // set system into the sleep state
 // system wakes up when watchdog is timed out
 void system_sleep() {
-  //  cbi(ADCSRA,ADEN);                    // switch Analog to Digitalconverter OFF
-  //  sbi(ACSR,ACD);                    //disable the analog comparator
-
-  //uint8_t mcucr1 = MCUCR | _BV(BODS) | _BV(BODSE);  //turn off the brown-out detector
-  //uint8_t mcucr2 = mcucr1 & ~_BV(BODSE);
-  //MCUCR = mcucr1;
-  //MCUCR = mcucr2;
-
+  GIMSK &=~_BV(PCIE0);                 // No Pin Change Interrupts
+  GIMSK &=~_BV(PCIE1);                 // No Pin Change Interrupts
+  
   set_sleep_mode(SLEEP_MODE_PWR_DOWN); // sleep mode is set here
   sleep_enable();
 
   sleep_mode();                        // System sleeps here
 
   sleep_disable();                     // System continues execution here when watchdog timed out
-
-  //sbi(ADCSRA,ADEN);                    // switch Analog to Digitalconverter ON
-  //cbi(ACSR,ACD);
 }
 
 // 0=16ms, 1=32ms,2=64ms,3=128ms,4=250ms,5=500ms
@@ -91,7 +80,7 @@ unsigned int getBandgap ()
   cbi(ACSR, ACD);
 
   //reads internal 1V1 reference against VCC
-#if 1 || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny44)
+#if defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny44__)
   ADMUX = _BV(MUX5) | _BV(MUX0); // For ATtiny84
 #elif defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny45__)
   ADMUX = _BV(MUX3) | _BV(MUX2); // For ATtiny85
@@ -144,11 +133,6 @@ void blinkFastN(uint8_t n, uint8_t l = led)
 void setup() {
   cbi(ADCSRA, ADEN);                // switch Analog to Digitalconverter OFF
   sbi(ACSR, ACD);                   //disable the analog comparator
-
-  //  uint8_t mcucr1 = MCUCR | _BV(BODS) | _BV(BODSE);  //turn off the brown-out detector
-  //  uint8_t mcucr2 = mcucr1 & ~_BV(BODSE);
-  //  MCUCR = mcucr1;
-  //  MCUCR = mcucr2;
 
   pinMode(led, OUTPUT);
 
