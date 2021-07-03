@@ -118,7 +118,7 @@ void blinkN(uint8_t n, uint8_t l = led)
   }
 }
 
-
+#if 0
 void blinkFastN(uint8_t n, uint8_t l = led)
 {
   for (uint8_t i = 0; i < n; i++) {
@@ -128,6 +128,7 @@ void blinkFastN(uint8_t n, uint8_t l = led)
     sleepDelay(64);
   }
 }
+#endif
 
 // the setup routine runs once when you press reset:
 void setup() {
@@ -169,7 +170,7 @@ void loop() {
   sleepDelay(1024);
   blinkN((v % 1000) / 100);
 
-  for (int l = 0; l < 50; l++) {
+  for (byte l = 0; l < 600000 / (8192 + 2 + 256 + 512); l++) {  // 600s / delay per loop (8192 + blink time)
     sleepDelay(8192);
     blinkN(1);
   }
