@@ -1,4 +1,4 @@
-# Attiny84 and ESP-01 (ESP8266) KiCad Design and example code
+# Attiny84 and ESP-01 (ESP8266) KiCad PCB and example code
 
 ## Usage
 
