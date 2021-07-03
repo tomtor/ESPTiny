@@ -195,7 +195,9 @@ void loop() {
   sleepDelay(32);
   pinMode(reset_ESP, INPUT);
 
-  delay(3000);
+  sleepDelay(1024);
+  sleepDelay(1024);
+  sleepDelay(1024);
   
   auto startcnt = cnt;
 

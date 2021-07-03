@@ -7,7 +7,7 @@
 
 #define POWERED false // true
 
-#if POWERED
+#if 1  // POWERED
 #include <ArduinoOTA.h>
 #endif
 
@@ -29,6 +29,8 @@ const char* host = "192.168.0.9";
 #include <Wire.h>
 
 ADC_MODE(ADC_VCC);
+
+volatile bool load_active;
 
 void setup() {
   Serial.begin(115200);
@@ -69,15 +71,19 @@ void setup() {
 #endif
   }
 
-#if POWERED
+#if 1 // POWERED
   ArduinoOTA.onStart([]() {
     Serial.println("Start");
+    load_active = true;
   });
   ArduinoOTA.onEnd([]() {
     Serial.println("\nEnd");
+    load_active = false;
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
     Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, progress % 10 == 0);
   });
   ArduinoOTA.onError([](ota_error_t error) {
     Serial.printf("Error[%u]: ", error);
@@ -127,6 +133,22 @@ void loop() {
 //  pinMode(LED_BUILTIN, OUTPUT);
 //  digitalWrite(LED_BUILTIN, HIGH);
   delay(50);
+
+  if (!i2c) {  // Reset by hand
+    Serial.println("Wait 20s for firmware OTA upload");
+    pinMode(LED_BUILTIN, OUTPUT);
+    auto endt = millis() + 20000;
+    while (millis() < endt) {
+      if (!load_active)
+        digitalWrite(LED_BUILTIN, HIGH);
+      delay(500);
+      ArduinoOTA.handle();
+      if (!load_active)
+        digitalWrite(LED_BUILTIN, LOW);
+      delay(500);
+    }
+  }
+
 
 #if !POWERED
   ESP.deepSleep(0);
