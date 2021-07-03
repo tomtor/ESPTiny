@@ -40,4 +40,4 @@ You can prevent this by pulling the Attiny RST low when using OTA, or just uploa
 
 https://github.com/tomtor/ESPTiny/raw/master/schema.pdf
 
-<img alt="Schema" src="./schema.svg" width="400">
+<img alt="Schema" src="./schema.svg">
