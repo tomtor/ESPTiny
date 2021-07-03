@@ -1,4 +1,4 @@
-# Attiny84 and ESP-01 (ESP8266) KiCad Design and example code
+# Attiny84 and ESP-01 (ESP8266) KiCad PCB and example code
 
 ## Usage
 
@@ -28,7 +28,7 @@ All components / features are optional:
 The attiny wakes up the ESP every 10 minutes by pulling RST low and sends a counter and the supply voltage to it.
 
 ### OTA for the ESP
-OTA for the ESP for program updates is started when the I2C communication fails.
+OTA for ESP program updates is activated when the I2C communication fails.
 This can be triggered by resetting the ESP by pulling the RST line low.
 Because the attiny is most of the time sleeping
 the I2C communication will fail.
@@ -40,4 +40,4 @@ You can prevent this by pulling the Attiny RST low when using OTA, or just uploa
 
 https://github.com/tomtor/ESPTiny/raw/master/schema.pdf
 
-<img alt="Schema" src="./schema.svg" width="400">
+<img alt="Schema" src="./schema.svg">
