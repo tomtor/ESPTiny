@@ -28,7 +28,7 @@ All components / features are optional:
 The attiny wakes up the ESP every 10 minutes by pulling RST low and sends a counter and the supply voltage to it.
 
 ### OTA for the ESP
-OTA for ESP program updates is activated when the I2C communication fails.
+OTA for ESP program updates is activated for 20s when the I2C communication fails.
 This can be triggered by resetting the ESP by pulling the RST line low.
 Because the attiny is most of the time sleeping
 the I2C communication will fail.
