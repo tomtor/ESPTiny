@@ -174,7 +174,11 @@ void loop() {
   blinkN((v % 1000) / 100);
 
   for (byte l = 0; l < 600000 / (8192 + 2 + 256 + 512); l++) {  // 600s / delay per loop (8192 + blink time)
-    sleepDelay(8192);
+    if (v > 3750) { // High voltage, burn more energy
+      digitalWrite(led, HIGH);
+      delay(8192);
+    } else
+      sleepDelay(8192);
     blinkN(1);
   }
 
