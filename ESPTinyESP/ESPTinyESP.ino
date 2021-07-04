@@ -149,6 +149,8 @@ void loop() {
     }
   }
 
+  while (ESP.getVcc() > 3800)  // Use power to lower voltage in solar charged super capacitor
+    ;
 
 #if !POWERED
   ESP.deepSleep(0);
