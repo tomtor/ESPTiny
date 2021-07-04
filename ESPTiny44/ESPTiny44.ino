@@ -17,14 +17,18 @@
 // set system into the sleep state
 // system wakes up when watchdog is timed out
 void system_sleep() {
+  GIMSK &= ~_BV(PCIE0);                // No Pin Change Interrupts
+  GIMSK &= ~_BV(PCIE1);                // No Pin Change Interrupts
+
+  USICR &= ~_BV(USISIE);               // No USI interrupt
+  USICR &= ~_BV(USIOIE);               // No USI interrupt
+
   set_sleep_mode(SLEEP_MODE_PWR_DOWN); // sleep mode is set here
   sleep_enable();
-  cli();                               // No interrupts
 
   sleep_mode();                        // System sleeps here
 
   sleep_disable();                     // System continues execution here when watchdog timed out
-  sei();                               // Enable interrupts
 }
 
 // 0=16ms, 1=32ms,2=64ms,3=128ms,4=250ms,5=500ms
