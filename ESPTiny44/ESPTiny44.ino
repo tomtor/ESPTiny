@@ -15,20 +15,18 @@
 #endif
 
 // set system into the sleep state
-// system wakes up when watchdog is timed out
+// system wakes up when watchdog times out
 void system_sleep() {
-  GIMSK &= ~_BV(PCIE0);                // No Pin Change Interrupts
-  GIMSK &= ~_BV(PCIE1);                // No Pin Change Interrupts
+  GIMSK &= ~(_BV(PCIE0) | _BV(PCIE1));   // No Pin Change Interrupts
 
-  USICR &= ~_BV(USISIE);               // No USI interrupt
-  USICR &= ~_BV(USIOIE);               // No USI interrupt
+  USICR &= ~(_BV(USISIE) | _BV(USIOIE)); // No USI interrupts
 
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN); // sleep mode is set here
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);  // sleep mode is set here
   sleep_enable();
 
-  sleep_mode();                        // System sleeps here
+  sleep_mode();                         // System sleeps here
 
-  sleep_disable();                     // System continues execution here when watchdog timed out
+  sleep_disable();                      // System continues execution here when watchdog timed out
 }
 
 // 0=16ms, 1=32ms,2=64ms,3=128ms,4=250ms,5=500ms
@@ -121,17 +119,6 @@ void blinkN(uint8_t n, uint8_t l = led)
   }
 }
 
-#if 0
-void blinkFastN(uint8_t n, uint8_t l = led)
-{
-  for (uint8_t i = 0; i < n; i++) {
-    digitalWrite(l, HIGH);
-    sleepDelay(2, false);
-    digitalWrite(l, LOW);
-    sleepDelay(64);
-  }
-}
-#endif
 
 // the setup routine runs once when you press reset:
 void setup() {
