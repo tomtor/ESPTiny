@@ -653,4 +653,6 @@ F 3 "" H 2550 2550 50  0001 C CNN
 	1    2550 2550
 	-1   0    0    1   
 $EndComp
+Text Notes 2100 2200 0    50   ~ 0
+Jumper J2 connects the battery directly to\n3V3 when a regulator is not needed.
 $EndSCHEMATC
