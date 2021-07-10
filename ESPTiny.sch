@@ -5,8 +5,8 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "ESP01 Attiny board"
-Date "2021-06-19"
-Rev "0.1"
+Date "2021-07-08"
+Rev "1.2"
 Comp ""
 Comment1 ""
 Comment2 ""
@@ -85,7 +85,7 @@ U 1 1 60CEB38F
 P 2100 1400
 F 0 "C2" H 2218 1446 50  0000 L CNN
 F 1 "100u" H 2218 1355 50  0000 L CNN
-F 2 "Capacitor_THT:CP_Radial_Tantal_D4.5mm_P2.50mm" H 2138 1250 50  0001 C CNN
+F 2 "Capacitor_THT:CP_Radial_D5.0mm_P2.50mm" H 2138 1250 50  0001 C CNN
 F 3 "~" H 2100 1400 50  0001 C CNN
 	1    2100 1400
 	1    0    0    -1  
@@ -543,7 +543,7 @@ F 3 "" H 2850 3350 50  0001 C CNN
 	0    -1   -1   0   
 $EndComp
 Text Label 2400 3350 0    50   ~ 0
-A1
+A3
 Wire Wire Line
 	2350 3350 2550 3350
 $Comp
@@ -620,4 +620,39 @@ Text Label 3450 4350 2    50   ~ 0
 B1
 Text Label 3750 4350 0    50   ~ 0
 RST
+$Comp
+L Jumper:SolderJumper_2_Open JP2
+U 1 1 60E6A894
+P 2700 2550
+F 0 "JP2" H 2700 2755 50  0000 C CNN
+F 1 "SolderJumper_2_Open" H 2700 2664 50  0000 C CNN
+F 2 "Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm" H 2700 2550 50  0001 C CNN
+F 3 "~" H 2700 2550 50  0001 C CNN
+	1    2700 2550
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+BATT #PWR07
+U 1 1 60E6B378
+P 2850 2550
+F 0 "#PWR07" H 2850 2400 50  0001 C CNN
+F 1 "+BATT" H 2865 2723 50  0000 C CNN
+F 2 "" H 2850 2550 50  0001 C CNN
+F 3 "" H 2850 2550 50  0001 C CNN
+	1    2850 2550
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:+3V3 #PWR06
+U 1 1 60E6CDE9
+P 2550 2550
+F 0 "#PWR06" H 2550 2400 50  0001 C CNN
+F 1 "+3V3" H 2565 2723 50  0000 C CNN
+F 2 "" H 2550 2550 50  0001 C CNN
+F 3 "" H 2550 2550 50  0001 C CNN
+	1    2550 2550
+	-1   0    0    1   
+$EndComp
+Text Notes 2100 2200 0    50   ~ 0
+Jumper J2 connects the battery directly to\n3V3 when a regulator is not needed.
 $EndSCHEMATC

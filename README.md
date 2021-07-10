@@ -38,6 +38,10 @@ You can prevent this by pulling the Attiny RST low when using OTA, or just uploa
 
 ## Schema
 
-https://github.com/tomtor/ESPTiny/raw/master/schema.pdf
+https://github.com/tomtor/ESPTiny/raw/master/ESPTiny.pdf
 
-<img alt="Schema" src="./schema.svg">
+<img alt="Schema" src="./ESPTiny.svg">
+
+## Credits
+
+https://github.com/jdunmire/kicad-ESP8266
