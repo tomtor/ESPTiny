@@ -1,7 +1,7 @@
 #define led       7
 #define reset_ESP 9
 
-#include <TinyWire.h>
+#include <Wire.h>
 
 #include <avr/sleep.h>
 #include <avr/wdt.h>
@@ -140,13 +140,12 @@ unsigned voltage;
 volatile unsigned cnt;
 
 // function that executes whenever data is requested by master
-// this function is registered as an event, see setup()
+// this function is registered as an event
 void requestEvent() {
-  // TinyWire.send("hi!!", 4); // respond with message of 4 bytes
-  TinyWire.send(cnt >> 8);
-  TinyWire.send(cnt & 0xFF);
-  TinyWire.send(voltage >> 8);
-  TinyWire.send(voltage & 0xFF);
+  Wire.write(cnt >> 8);
+  Wire.write(cnt & 0xFF);
+  Wire.write(voltage >> 8);
+  Wire.write(voltage & 0xFF);
 
   ++cnt;
 }
@@ -180,12 +179,12 @@ void loop() {
   
   auto startcnt = cnt;
 
-  TinyWire.begin(1);                // join i2c bus with address #1
-  TinyWire.onRequest(requestEvent); // register event
+  Wire.begin(1);                // join i2c bus with address #1
+  Wire.onRequest(requestEvent); // register event
   
   auto end = millis() + 4000;
   while (cnt == startcnt && millis() < end)
     ;
   delay(200);
-  TinyWire.end();
+  Wire.end();
 }
