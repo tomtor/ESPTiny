@@ -1,4 +1,4 @@
-# Attiny84 and ESP-01 (ESP8266) KiCad PCB and example code
+# Attiny84/16x4 and ESP-01 (ESP8266) KiCad PCB and example code
 
 ## Usage
 
@@ -9,11 +9,13 @@ Attiny and ESP combined use 12uA in sleep mode.
 
 ![3D rendering](ESPTiny.png)
 
+![3D rendering](ESPTiny1614.png)
+
 Usable on breadboard (9 rows high, leaves 3 rows empty) OR stand alone.
 
 All components / features are optional:
 
-- AtTiny84
+- AtTiny84 PCB or AtTiny1604 / AtTiny1614 PCB
 - ESP-01
 - LED with resistor
 - MCP1700 low quiescent current regulator
@@ -36,11 +38,13 @@ the I2C communication will fail.
 There is a small chance that the attiny will reset the ESP during upload when the 10 minute interval is completed.
 You can prevent this by pulling the Attiny RST low when using OTA, or just upload again.
 
-## Schema
+## Schemas
 
 https://github.com/tomtor/ESPTiny/raw/master/ESPTiny.pdf
-
 <img alt="Schema" src="./ESPTiny.svg">
+
+https://github.com/tomtor/ESPTiny/raw/master/ESPTiny1614.pdf
+<img alt="Schema" src="./ESPTiny1614.svg">
 
 ## Credits
 
