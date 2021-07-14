@@ -2,8 +2,8 @@
 
 ## Usage
 
-The main function of the attiny is acting as a very battery friendly low power co-processor for the ESP.
-A bit like the low power co-processor of the ESP32, except with a lot more IO functions and program memory.
+The main function of the attiny is acting as a battery friendly low power co-processor for the ESP.
+A bit like the ULP low power co-processor of the ESP32, except with a lot more IO functions and program memory.
 
 Attiny and ESP combined use 12uA in sleep mode.
 
@@ -11,12 +11,14 @@ Attiny and ESP combined use 12uA in sleep mode.
 
 ![3D rendering](ESPTiny1614.png)
 
-Usable on breadboard (9 rows high, leaves 3 rows empty) OR stand alone.
+Usable on breadboard (AtTiny84: 9 rows high, leaves 3 rows empty and AtTiny16x4: 8 rows high) OR stand alone.
+
+2 PCB designs: AtTiny84 PCB or AtTiny1604 / AtTiny1614
 
 All components / features are optional:
 
-- AtTiny84 PCB or AtTiny1604 / AtTiny1614 PCB
-- ESP-01
+- AtTiny84 or AtTiny1604 / AtTiny1614
+- ESP-01 (When not used the connections/space can be used for any other (I2C) device)
 - LED with resistor
 - MCP1700 low quiescent current regulator
 - BAT85 diode for Solar Charging panel (see https://www.thethingsnetwork.org/labs/story/a-cheap-stm32-arduino-node/step/solar-power)
