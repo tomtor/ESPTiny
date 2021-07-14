@@ -4,10 +4,10 @@ EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
-Title "ESP01 Attiny board"
-Date "2021-07-08"
-Rev "1.2"
-Comp ""
+Title "ESP01 Attiny1614 board"
+Date "2021-07-13"
+Rev "1.0"
+Comp "http://www.v7f.eu"
 Comment1 ""
 Comment2 ""
 Comment3 ""
@@ -45,17 +45,6 @@ F 2 "Connector_PinHeader_2.54mm:PinHeader_1x10_P2.54mm_Vertical" H 6700 3450 50 
 F 3 "~" H 6700 3450 50  0001 C CNN
 	1    6700 3450
 	0    -1   -1   0   
-$EndComp
-$Comp
-L MCU_Microchip_ATtiny:ATtiny84-20PU U2
-U 1 1 60CE8824
-P 4450 3050
-F 0 "U2" V 3783 3050 50  0000 C CNN
-F 1 "ATtiny84-20PU" V 3874 3050 50  0000 C CNN
-F 2 "Package_DIP:DIP-14_W7.62mm" H 4450 3050 50  0001 C CIN
-F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/doc8006.pdf" H 4450 3050 50  0001 C CNN
-	1    4450 3050
-	0    1    1    0   
 $EndComp
 $Comp
 L Diode:BAT85 D2
@@ -324,58 +313,12 @@ F 3 "~" H 3800 1250 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	3800 1250 3800 1550
-Text Label 3850 3650 3    50   ~ 0
-TRST
-Text Label 3950 3650 3    50   ~ 0
-B2
-Text Label 4050 3650 3    50   ~ 0
-B1
-Text Label 4150 3650 3    50   ~ 0
-B0
-Text Label 4350 3650 3    50   ~ 0
-A7
-Text Label 4450 3650 3    50   ~ 0
-SDA-A6
-Text Label 4550 3650 3    50   ~ 0
-A5
-Text Label 4650 3650 3    50   ~ 0
-SCL-A4
-Text Label 4750 3650 3    50   ~ 0
-A3
-Text Label 4850 3650 3    50   ~ 0
-A2
-Text Label 4950 3650 3    50   ~ 0
-A1
-Text Label 5050 3650 3    50   ~ 0
-A0
-$Comp
-L power:+3V3 #PWR0114
-U 1 1 60D516BB
-P 5350 3050
-F 0 "#PWR0114" H 5350 2900 50  0001 C CNN
-F 1 "+3V3" H 5365 3223 50  0000 C CNN
-F 2 "" H 5350 3050 50  0001 C CNN
-F 3 "" H 5350 3050 50  0001 C CNN
-	1    5350 3050
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR0115
-U 1 1 60D51F95
-P 3550 3050
-F 0 "#PWR0115" H 3550 2800 50  0001 C CNN
-F 1 "GND" H 3555 2877 50  0000 C CNN
-F 2 "" H 3550 3050 50  0001 C CNN
-F 3 "" H 3550 3050 50  0001 C CNN
-	1    3550 3050
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	2900 3950 2900 4250
 Text Label 7700 4700 0    50   ~ 0
-SDA-A6
+SDA-B1
 Text Label 7700 4600 0    50   ~ 0
-SCL-A4
+SCL-B0
 $Comp
 L power:+3V3 #PWR0116
 U 1 1 60D7060A
@@ -422,29 +365,29 @@ RX
 Text Label 7100 2400 3    50   ~ 0
 TX
 Text Label 6800 2400 3    50   ~ 0
-SCL-A4
+SCL-B0
 Text Label 7000 3250 1    50   ~ 0
-SDA-A6
-Text Label 6400 2400 3    50   ~ 0
-A0
-Text Label 6500 2400 3    50   ~ 0
-A1
-Text Label 6600 2400 3    50   ~ 0
-A2
-Text Label 6700 2400 3    50   ~ 0
-A3
-Text Label 6900 2400 3    50   ~ 0
-A5
-Text Label 6500 3250 1    50   ~ 0
-B0
-Text Label 6600 3250 1    50   ~ 0
-B1
-Text Label 6800 3250 1    50   ~ 0
 B2
-Text Label 6700 3250 1    50   ~ 0
+Text Label 6400 2400 3    50   ~ 0
+A3
+Text Label 6500 2400 3    50   ~ 0
+A2
+Text Label 6600 2400 3    50   ~ 0
+A1
+Text Label 6700 2400 3    50   ~ 0
 TRST
-Text Label 6900 3250 1    50   ~ 0
+Text Label 6900 2400 3    50   ~ 0
+SDA-B1
+Text Label 6500 3250 1    50   ~ 0
+A4
+Text Label 6600 3250 1    50   ~ 0
+A5
+Text Label 6800 3250 1    50   ~ 0
 A7
+Text Label 6700 3250 1    50   ~ 0
+A6
+Text Label 6900 3250 1    50   ~ 0
+B3
 $Comp
 L power:GND #PWR0120
 U 1 1 60D95E9C
@@ -569,7 +512,7 @@ F 3 "~" H 5250 1400 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Text Label 5250 1550 3    50   ~ 0
-SDA-A6
+SDA-B1
 $Comp
 L power:+3V3 #PWR04
 U 1 1 60DC3C00
@@ -593,7 +536,7 @@ F 3 "~" H 5600 1400 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Text Label 5600 1550 3    50   ~ 0
-SCL-A4
+SCL-B0
 $Comp
 L Jumper:SolderJumper_2_Bridged JP1
 U 1 1 60DEB11A
@@ -606,7 +549,7 @@ F 3 "~" H 3600 4350 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Text Label 3450 4350 2    50   ~ 0
-B1
+A7
 Text Label 3750 4350 0    50   ~ 0
 RST
 $Comp
@@ -647,34 +590,91 @@ Jumper J2 connects the battery directly to\n3V3 when a regulator is not needed.
 $Comp
 L MyJumper:SolderJumper_3_Bridged12 JP3
 U 1 1 60EC5FD3
-P 5350 4600
-F 0 "JP3" V 5396 4668 50  0000 L CNN
-F 1 "SolderJumper_3_Bridged12" V 5305 4668 50  0000 L CNN
-F 2 "Jumper:SolderJumper-3_P1.3mm_Bridged12_RoundedPad1.0x1.5mm_NumberLabels" H 5350 4600 50  0001 C CNN
-F 3 "~" H 5350 4600 50  0001 C CNN
-	1    5350 4600
+P 5300 4600
+F 0 "JP3" V 5346 4668 50  0000 L CNN
+F 1 "SolderJumper_3_Bridged12" V 5255 4668 50  0000 L CNN
+F 2 "Jumper:SolderJumper-3_P1.3mm_Bridged12_RoundedPad1.0x1.5mm_NumberLabels" H 5300 4600 50  0001 C CNN
+F 3 "~" H 5300 4600 50  0001 C CNN
+	1    5300 4600
 	0    -1   -1   0   
 $EndComp
 $Comp
 L power:+3V3 #PWR05
 U 1 1 60EF28CB
-P 5350 4850
-F 0 "#PWR05" H 5350 4700 50  0001 C CNN
-F 1 "+3V3" V 5365 4978 50  0000 L CNN
-F 2 "" H 5350 4850 50  0001 C CNN
-F 3 "" H 5350 4850 50  0001 C CNN
-	1    5350 4850
+P 5300 4850
+F 0 "#PWR05" H 5300 4700 50  0001 C CNN
+F 1 "+3V3" V 5315 4978 50  0000 L CNN
+F 2 "" H 5300 4850 50  0001 C CNN
+F 3 "" H 5300 4850 50  0001 C CNN
+	1    5300 4850
 	-1   0    0    1   
 $EndComp
 Text Label 2900 4150 0    50   ~ 0
 A7
-Text Label 5350 4400 0    50   ~ 0
-B0
+Text Label 5300 4400 0    50   ~ 0
+A6
 Wire Wire Line
-	5950 4600 5800 4600
+	5900 4600 5800 4600
 Wire Wire Line
-	5350 4850 5350 4800
+	5300 4850 5300 4800
+$Comp
+L MCU_Microchip_ATtiny:ATtiny1614-SS U2
+U 1 1 60ED8371
+P 4700 3050
+F 0 "U2" H 4700 3931 50  0000 C CNN
+F 1 "ATtiny1614-SS" H 4700 3840 50  0000 C CNN
+F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 4700 3050 50  0001 C CIN
+F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/ATtiny1614-data-sheet-40001995A.pdf" H 4700 3050 50  0001 C CNN
+	1    4700 3050
+	1    0    0    -1  
+$EndComp
+Text Label 4100 2650 2    50   ~ 0
+SCL-B0
+Text Label 4100 2750 2    50   ~ 0
+SDA-B1
+Text Label 4100 2850 2    50   ~ 0
+B2
+Text Label 4100 2950 2    50   ~ 0
+B3
+Text Label 5300 2650 0    50   ~ 0
+TRST
+Text Label 5300 2750 0    50   ~ 0
+A1
+Text Label 5300 2850 0    50   ~ 0
+A2
+Text Label 5300 2950 0    50   ~ 0
+A3
+Text Label 5300 3050 0    50   ~ 0
+A4
+Text Label 5300 3150 0    50   ~ 0
+A5
+Text Label 5300 3250 0    50   ~ 0
+A6
+Text Label 5300 3350 0    50   ~ 0
+A7
+$Comp
+L power:+3V3 #PWR0113
+U 1 1 60EDC899
+P 4700 2350
+F 0 "#PWR0113" H 4700 2200 50  0001 C CNN
+F 1 "+3V3" V 4715 2478 50  0000 L CNN
+F 2 "" H 4700 2350 50  0001 C CNN
+F 3 "" H 4700 2350 50  0001 C CNN
+	1    4700 2350
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:GND #PWR0114
+U 1 1 60EDD4B8
+P 4700 3750
+F 0 "#PWR0114" H 4700 3500 50  0001 C CNN
+F 1 "GND" H 4705 3577 50  0000 C CNN
+F 2 "" H 4700 3750 50  0001 C CNN
+F 3 "" H 4700 3750 50  0001 C CNN
+	1    4700 3750
+	1    0    0    -1  
+$EndComp
 Connection ~ 5800 4600
 Wire Wire Line
-	5800 4600 5500 4600
+	5800 4600 5450 4600
 $EndSCHEMATC
