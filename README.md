@@ -8,8 +8,10 @@ A bit like the ULP low power co-processor of the ESP32, except with a lot more I
 ATtiny and ESP combined use 12uA in sleep mode.
 
 ![3D rendering](ESPTiny.png)
+![3D rendering](ESPTinyEmpty.png)
 
 ![3D rendering](ESPTiny1614.png)
+![3D rendering](ESPTiny1614Empty.png)
 
 Usable on breadboard (ATtiny84: 9 rows high, leaves 3 rows empty and ATtiny16x4: 8 rows high) OR stand alone.
 
