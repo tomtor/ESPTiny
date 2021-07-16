@@ -1,5 +1,5 @@
 #define led       7
-#define reset_ESP 9 // for PCB version 1.2 use B11
+#define reset_ESP PIN_A7 // for PCB version 1.2 use B11
 
 #include <Wire.h>
 
