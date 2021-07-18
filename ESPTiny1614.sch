@@ -549,7 +549,7 @@ F 3 "~" H 3600 4350 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Text Label 3450 4350 2    50   ~ 0
-A7
+B1
 Text Label 3750 4350 0    50   ~ 0
 RST
 $Comp
