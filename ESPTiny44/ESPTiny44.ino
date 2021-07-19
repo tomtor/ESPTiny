@@ -56,9 +56,15 @@ ISR(WDT_vect) {
 void sleepDelay(unsigned n, boolean off = true)
 {
   if (n < 16) {
+#if F_CPU==4000000L
+    clock_prescale_set(clock_div_32); // was div_2
+    delayMicroseconds(n * 1000 / 16);
+    clock_prescale_set(clock_div_2);
+#else
     clock_prescale_set(clock_div_32);
     delayMicroseconds(n * 1000 / 32);
     clock_prescale_set(clock_div_1);
+#endif
   } else {
     byte v = 0;
     while (n >>= 1)
