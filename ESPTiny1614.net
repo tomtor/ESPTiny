@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source /home/tom/src/ESPTiny/ESPTiny1614.sch)
-    (date "zo 18 jul 2021 13:13:56 CEST")
+    (date "ma 19 jul 2021 15:15:12 CEST")
     (tool "Eeschema 5.1.10-88a1d61d58~90~ubuntu20.04.1")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
@@ -129,7 +129,7 @@
       (tstamp 60DEB11A))
     (comp (ref JP2)
       (value SolderJumper_2_Open)
-      (footprint Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm)
+      (footprint Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm)
       (datasheet ~)
       (libsource (lib Jumper) (part SolderJumper_2_Open) (description "Solder Jumper, 2-pole, open"))
       (sheetpath (names /) (tstamps /))

@@ -558,7 +558,7 @@ U 1 1 60E6A894
 P 2700 2550
 F 0 "JP2" H 2700 2755 50  0000 C CNN
 F 1 "SolderJumper_2_Open" H 2700 2664 50  0000 C CNN
-F 2 "Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm" H 2700 2550 50  0001 C CNN
+F 2 "Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm" H 2700 2550 50  0001 C CNN
 F 3 "~" H 2700 2550 50  0001 C CNN
 	1    2700 2550
 	1    0    0    -1  
