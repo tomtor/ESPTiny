@@ -1013,7 +1013,7 @@
   (gr_text 3V3 (at 70.358 60.706) (layer F.SilkS) (tstamp 60EE976F)
     (effects (font (size 0.8 0.8) (thickness 0.15)))
   )
-  (gr_text RST (at 67.818 60.706) (layer F.SilkS) (tstamp 60D74382)
+  (gr_text RST (at 67.691 60.706) (layer F.SilkS) (tstamp 60D74382)
     (effects (font (size 0.8 0.8) (thickness 0.15)))
   )
   (gr_text "SDA\nA1G0" (at 62.5602 44.196) (layer F.SilkS) (tstamp 60D74380)
