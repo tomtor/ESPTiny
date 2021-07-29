@@ -1,4 +1,4 @@
-# ATtiny84/16x4 and ESP-01 (ESP8266) KiCad PCB and example code
+# ATtiny84/16x4/x02 and ESP-01 (ESP8266) KiCad PCB and example code
 
 ## Usage
 
@@ -14,13 +14,16 @@ is switched off by the ATtiny with CS.
 ![3D rendering](ESPTiny1614.png)
 ![3D rendering](ESPTiny1614Empty.png)
 
+![3D rendering](ESPTiny402.png)
+![3D rendering](ESPTiny402Empty.png)
+
 Usable on breadboard (ATtiny84: 9 rows high, leaves 3 rows empty and ATtiny16x4: 8 rows high) OR stand alone.
 
-2 PCB designs: ATtiny84 PCB or ATtiny1604 / ATtiny1614 PCB
+3 PCB designs: ATtiny84 or ATtiny16x4 or ATtinyx02
 
 All components / features are optional:
 
-- ATtiny84 or ATtiny1604 / ATtiny1614
+- ATtiny84 or ATtiny1604 / ATtiny1614 or ATtiny202 / ATtiny402
 - ESP-01 (When not used the connections/space can be used for any other (I2C) device)
 - LED with resistor
 - MCP1700 low quiescent current regulator
@@ -50,6 +53,9 @@ https://github.com/tomtor/ESPTiny/raw/master/ESPTiny.pdf
 
 https://github.com/tomtor/ESPTiny/raw/master/ESPTiny1614.pdf
 <img alt="Schema" src="./ESPTiny1614.svg">
+
+https://github.com/tomtor/ESPTiny/raw/master/ESPTiny402.pdf
+<img alt="Schema" src="./ESPTiny402.svg">
 
 ## Credits
 
