@@ -1,4 +1,4 @@
-update=zo 01 aug 2021 11:25:19 CEST
+update=ma 02 aug 2021 11:29:45 CEST
 version=1
 last_client=pcbnew
 [general]
@@ -15,7 +15,7 @@ LibDir=
 [pcbnew]
 version=1
 PageLayoutDescrFile=
-LastNetListRead=ESPTiny402-SOT89.net
+LastNetListRead=ESPTiny402.net
 CopperLayerCount=2
 BoardThickness=1.6
 AllowMicroVias=0
