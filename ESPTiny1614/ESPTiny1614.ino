@@ -46,7 +46,15 @@ void sleepDelay(unsigned n, boolean off = true)
     case 8192: case 8000: ticks = 16; break;
     default: ticks = n+1; period = RTC_PERIOD_CYC32_gc; break; // 1 ms resolution
   }
+  
+  while (RTC.PITSTATUS & 1)
+    ;
+  
   RTC.PITCTRLA = period | RTC_PITEN_bm;    /* Enable PIT counter: enabled */
+  
+  while (RTC.PITSTATUS & 1)
+    ;
+  
   while (ticks) {
     ticks--;
     sleep_cpu();
