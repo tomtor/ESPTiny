@@ -25,40 +25,36 @@ ISR(RTC_PIT_vect)
 }
 
 
-void sleepDelay(unsigned n, boolean off = true)
+void sleepDelay(uint16_t n, boolean off = true)
 {
-  unsigned ticks = 1;
-  byte period = RTC_PERIOD_CYC16384_gc; // 512 ms
-  switch (n) {
-    //case 1: period = RTC_PERIOD_CYC32_gc; break;
-    case 1: period = RTC_PERIOD_CYC64_gc; break;
-    case 2: period = RTC_PERIOD_CYC128_gc; break;
-    case 4: period = RTC_PERIOD_CYC256_gc; break;
-    case 8: period = RTC_PERIOD_CYC512_gc; break;
-    case 16: period = RTC_PERIOD_CYC1024_gc; break;
-    case 32: period = RTC_PERIOD_CYC2048_gc; break;
-    case 64: period = RTC_PERIOD_CYC4096_gc; break;
-    case 128: period = RTC_PERIOD_CYC8192_gc; break;
-    case 512: case 500: break;
-    case 1024: case 1000: ticks = 2; break;
-    case 2048: case 2000: ticks = 4; break;
-    case 4096: case 4000: ticks = 8; break;
-    case 8192: case 8000: ticks = 16; break;
-    default: ticks = n+1; period = RTC_PERIOD_CYC32_gc; break; // 1 ms resolution
-  }
+  uint16_t ticks;
+  int8_t period = RTC_PERIOD_CYC4_gc; // 1/8 ms
+  int8_t shift;
+  uint16_t m = n;
   
-  while (RTC.PITSTATUS & 1)
+  while ( (m>>=1) && period < RTC_PERIOD_CYC16384_gc) {
+	period += (1<<3);
+  }
+  shift = 3 + RTC_PERIOD_CYC4_gc - period; // on average 8 sleeps for a delay
+
+  if (shift > 0)
+	ticks = (n << shift);
+  else if (shift < 0)
+	ticks = (n >> -shift);
+  else
+	ticks = n;
+  ticks++; // one extra for average better timing
+
+  while (RTC.PITSTATUS & RTC_CTRLBUSY_bm)
     ;
   
   RTC.PITCTRLA = period | RTC_PITEN_bm;    /* Enable PIT counter: enabled */
   
-  while (RTC.PITSTATUS & 1)
+  while (RTC.PITSTATUS & RTC_CTRLBUSY_bm)
     ;
   
-  while (ticks) {
-    ticks--;
+  while (ticks--)
     sleep_cpu();
-  }
 }
 
 #if 1
@@ -111,8 +107,7 @@ void blinkN(uint8_t n, uint8_t l = led)
     digitalWrite(l, HIGH);
     sleepDelay(2, false);
     digitalWrite(l, LOW);
-    sleepDelay(512);
-    sleepDelay(128);
+    sleepDelay(700);
   }
 }
 
@@ -141,7 +136,7 @@ void setup() {
     blinkN(1, led);
   }
 
-  sleepDelay(4096);
+  sleepDelay(5000);
 }
 
 
@@ -172,18 +167,12 @@ void loop() {
   sleepDelay(1500);
   blinkN((v % 100) / 10);
   
-  for (byte l = 0; l < 600000 / (8192 + 2 + 256 + 512); l++) {  // 600s / delay per loop (8192 + blink time)
-#if 0
-    if (v > 3750) { // High voltage, burn more energy
-      digitalWrite(led, HIGH);
-      delay(8192);
-    } else
-#endif
-      sleepDelay(8192);
-    blinkN(1);
+  for (byte l = 0; l < 300000 / (5000 + 2 + 700); l++) {  // 300s / delay per loop (5000 + blink time)
+	sleepDelay(5000);
+	blinkN(1);
   }
 
-#if 0
+#if 1
   digitalWrite(reset_ESP, LOW);
   pinMode(reset_ESP, OUTPUT);
   sleepDelay(32);
