@@ -26,19 +26,19 @@ ISR(RTC_PIT_vect)
 void sleepDelay(uint16_t n)
 {
   uint16_t ticks;
-  int8_t period = RTC_PERIOD_CYC4_gc; // 1/8 ms
+  int8_t period = 0x01; // RTC_PERIOD_CYC4_gc; // 1/8 ms
   int8_t shift;
   uint16_t m = n;
   
-  while ( (m>>=1) && period < RTC_PERIOD_CYC16384_gc) {
-	period += (1<<RTC_PERIOD_gp);
+  while ( (m>>=1) && period < 0x0D /* RTC_PERIOD_CYC16384_gc */) {
+	period++;
   }
 
   // On average 8 sleep periods for a delay.
   // So we shift left 3 (multiply by 8) for an 1 ms delay and with 1/8 ms periods,
   // shift left 2 for a 2 ms delay with 1/4 ms periods, shift left 1 for a 4 ms delay,
   // shift right 1 for a 16 ms delay, right 2 for a 32 ms delay ...
-  shift = 3 + RTC_PERIOD_CYC4_gc - period;
+  shift = 3 - (period - 1);
 
   if (shift > 0)
 	ticks = (n << shift);
@@ -51,7 +51,7 @@ void sleepDelay(uint16_t n)
   while (RTC.PITSTATUS & RTC_CTRLBUSY_bm)
     ;
   
-  RTC.PITCTRLA = period | RTC_PITEN_bm;    /* Enable PIT counter: enabled */
+  RTC.PITCTRLA = (period >> RTC_PERIOD_gp) | RTC_PITEN_bm;    /* Enable PIT counter: enabled */
   
   while (RTC.PITSTATUS & RTC_CTRLBUSY_bm)
     ;
