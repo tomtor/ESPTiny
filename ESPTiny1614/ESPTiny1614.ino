@@ -4,8 +4,6 @@
 #include <Wire.h>
 
 #include <avr/sleep.h>
-//#include <avr/wdt.h>
-//#include <avr/power.h>
 
 void RTC_init(void)
 {
@@ -25,7 +23,7 @@ ISR(RTC_PIT_vect)
 }
 
 
-void sleepDelay(uint16_t n, boolean off = true)
+void sleepDelay(uint16_t n)
 {
   uint16_t ticks;
   int8_t period = RTC_PERIOD_CYC4_gc; // 1/8 ms
@@ -33,9 +31,14 @@ void sleepDelay(uint16_t n, boolean off = true)
   uint16_t m = n;
   
   while ( (m>>=1) && period < RTC_PERIOD_CYC16384_gc) {
-	period += (1<<3);
+	period += (1<<RTC_PERIOD_gp);
   }
-  shift = 3 + RTC_PERIOD_CYC4_gc - period; // on average 8 sleeps for a delay
+
+  // On average 8 sleep periods for a delay.
+  // So we shift left 3 (multiply by 8) for an 1 ms delay and with 1/8 ms periods,
+  // shift left 2 for a 2 ms delay with 1/4 ms periods, shift left 1 for a 4 ms delay,
+  // shift right 1 for a 16 ms delay, right 2 for a 32 ms delay ...
+  shift = 3 + RTC_PERIOD_CYC4_gc - period;
 
   if (shift > 0)
 	ticks = (n << shift);
@@ -105,7 +108,7 @@ void blinkN(uint8_t n, uint8_t l = led)
 {
   for (uint8_t i = 0; i < n; i++) {
     digitalWrite(l, HIGH);
-    sleepDelay(2, false);
+    sleepDelay(2);
     digitalWrite(l, LOW);
     sleepDelay(700);
   }
