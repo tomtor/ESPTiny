@@ -85,10 +85,10 @@ unsigned int getBandgap ()
 } // end of getBandgap
 #endif
 
-#if 0
+#if 1
 unsigned int getBattery ()
 {
-  int val = analogRead(A1);
+  int val = analogRead(PIN_PA3);
 
   // 3.0v regulator with voltage divider (820k/820k):
   const float Vref = 3000,
@@ -178,11 +178,9 @@ void loop() {
   digitalWrite(reset_ESP, LOW);
   pinMode(reset_ESP, OUTPUT);
   sleepDelay(32);
-  pinMode(reset_ESP, INPUT);
+  pinMode(reset_ESP, INPUT_PULLUP);
 
-  sleepDelay(1024);
-  sleepDelay(1024);
-  sleepDelay(1024);
+  sleepDelay(3000);
   
   auto startcnt = cnt;
 
