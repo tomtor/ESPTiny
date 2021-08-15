@@ -26,43 +26,42 @@ ISR(RTC_PIT_vect)
 void sleepDelay(uint16_t n)
 {
   uint16_t ticks;
-  int8_t period = 0x01; // RTC_PERIOD_CYC4_gc; // 1/8 ms
-  int8_t shift;
-  uint16_t m = n;
-  
-  while ( (m>>=1) && period < 0x0D /* RTC_PERIOD_CYC16384_gc */) {
-	period++;
+  int8_t period;
+
+  if (n < 10) {
+  	period = RTC_PERIOD_OFF_gc; // 1/32 ms
+	ticks = (n >> 5);
+  } else if (n < 100) {
+  	period = RTC_PERIOD_CYC8_gc; // 1/4 ms
+	ticks = (n >> 2);
+  } else if (n < 1000) {
+  	period = RTC_PERIOD_CYC64_gc; // 2 ms
+	ticks = (n << 1);
+  } else {
+  	period = RTC_PERIOD_CYC1024_gc; // 32 ms
+	ticks = (n << 5);
   }
 
-  // On average 8 sleep periods for a delay.
-  // So we shift left 3 (multiply by 8) for an 1 ms delay and with 1/8 ms periods,
-  // shift left 2 for a 2 ms delay with 1/4 ms periods, shift left 1 for a 4 ms delay,
-  // shift right 1 for a 16 ms delay, right 2 for a 32 ms delay ...
-  shift = 3 - (period - 1);
-
-  if (shift > 0)
-	ticks = (n << shift);
-  else if (shift < 0)
-	ticks = (n >> -shift);
-  else
-	ticks = n;
-  ticks++; // one extra for average better timing
-
-  while (RTC.PITSTATUS & RTC_CTRLBUSY_bm)
-    ;
+  ticks++; // one more for better average
   
-  RTC.PITCTRLA = (period >> RTC_PERIOD_gp) | RTC_PITEN_bm;    /* Enable PIT counter: enabled */
+  RTC.PITCTRLA = period | RTC_PITEN_bm;    // Enable PIT counter: enabled
   
-  while (RTC.PITSTATUS & RTC_CTRLBUSY_bm)
+  while (RTC.PITSTATUS & RTC_CTRLBUSY_bm)  // Wait for new settings to synchronize
     ;
   
   while (ticks--)
     sleep_cpu();
+
+  RTC.PITCTRLA = 0;    /* Disable PIT counter */
 }
 
 #if 1
 unsigned int getBandgap ()
 {
+#if 1
+  analogReference(INTERNAL1V1);
+  uint16_t Vcc_value = 0x400 * 1100L / analogRead(ADC_INTREF); /* calculate the Vcc value */
+#else
   VREF.CTRLA = VREF_ADC0REFSEL_1V1_gc;    /* Set the Vref to 1.1V*/
 
   /* The following section is partially taken from Microchip App Note AN2447 page 13*/
@@ -81,7 +80,7 @@ unsigned int getBandgap ()
   ADC0.COMMAND |= 1;                  // start running ADC
   while (!(ADC0.INTFLAGS & ADC_RESRDY_bm));
   Vcc_value = 0x400 * 1100L / ADC0.RES /* calculate the Vcc value */;
-  
+#endif
   return Vcc_value;
 } // end of getBandgap
 #endif
