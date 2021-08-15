@@ -5,6 +5,14 @@
 
 #include <avr/sleep.h>
 
+#define USE_BME	0
+
+#if USE_BME
+#include <BME280I2C.h>
+
+BME280I2C bme;
+#endif
+
 void RTC_init(void)
 {
   /* Initialize RTC: */
@@ -174,6 +182,25 @@ void loop() {
 	blinkN(1);
   }
 
+#if USE_BME
+  Wire.begin(1);                // join i2c bus with address #1
+  bme.begin();
+#if 0
+  float temp(NAN), hum(NAN), pres(NAN);
+
+  BME280::TempUnit tempUnit(BME280::TempUnit_Celsius);
+  BME280::PresUnit presUnit(BME280::PresUnit_Pa);
+
+  bme.read(pres, temp, hum, tempUnit, presUnit);
+#else
+  static float oldtemp;
+  float temp;
+  if ((temp = bme.temp()) == oldtemp)
+    return;
+  oldtemp = temp;
+#endif
+#endif
+  
 #if 1
   digitalWrite(reset_ESP, LOW);
   pinMode(reset_ESP, OUTPUT);
@@ -186,7 +213,7 @@ void loop() {
 
   Wire.begin(1);                // join i2c bus with address #1
   Wire.onRequest(requestEvent); // register event
-  
+
   auto end = millis() + 4000;
   while (cnt == startcnt && millis() < end)
     ;
