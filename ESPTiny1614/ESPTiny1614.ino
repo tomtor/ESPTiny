@@ -30,16 +30,16 @@ void sleepDelay(uint16_t n)
 
   if (n < 10) {
   	period = RTC_PERIOD_OFF_gc; // 1/32 ms
-	ticks = (n >> 5);
+	ticks = (n << 5);
   } else if (n < 100) {
   	period = RTC_PERIOD_CYC8_gc; // 1/4 ms
-	ticks = (n >> 2);
+	ticks = (n << 2);
   } else if (n < 1000) {
   	period = RTC_PERIOD_CYC64_gc; // 2 ms
-	ticks = (n << 1);
+	ticks = (n >> 1);
   } else {
   	period = RTC_PERIOD_CYC1024_gc; // 32 ms
-	ticks = (n << 5);
+	ticks = (n >> 5);
   }
 
   ticks++; // one more for better average
