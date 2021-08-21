@@ -34,24 +34,28 @@ ISR(RTC_PIT_vect)
 void sleepDelay(uint16_t n)
 {
   uint16_t ticks;
-  int8_t period;
+  uint8_t period;
 
+#if 0
   if (n < 10) {
-  	period = RTC_PERIOD_OFF_gc; // 1/32 ms
-	ticks = (n << 5);
-  } else if (n < 100) {
+  	period = RTC_PERIOD_CYC4_gc; // 1/8 ms
+	  ticks = (n << 3);
+  } else
+#endif
+  if (n < 100) {
   	period = RTC_PERIOD_CYC8_gc; // 1/4 ms
-	ticks = (n << 2);
+	  ticks = (n << 2);
   } else if (n < 1000) {
   	period = RTC_PERIOD_CYC64_gc; // 2 ms
-	ticks = (n >> 1);
+	  ticks = (n >> 1);
   } else {
   	period = RTC_PERIOD_CYC1024_gc; // 32 ms
-	ticks = (n >> 5);
+	  ticks = (n >> 5);
   }
-
-  ticks++; // one more for better average
   
+  while (RTC.PITSTATUS & RTC_CTRLBUSY_bm)  // Wait for new settings to synchronize
+    ;
+      
   RTC.PITCTRLA = period | RTC_PITEN_bm;    // Enable PIT counter: enabled
   
   while (RTC.PITSTATUS & RTC_CTRLBUSY_bm)  // Wait for new settings to synchronize
@@ -66,7 +70,7 @@ void sleepDelay(uint16_t n)
 #if 1
 unsigned int getBandgap ()
 {
-#if 1
+#if 0
   analogReference(INTERNAL1V1);
   uint16_t Vcc_value = 0x400 * 1100L / analogRead(ADC_INTREF); /* calculate the Vcc value */
 #else
