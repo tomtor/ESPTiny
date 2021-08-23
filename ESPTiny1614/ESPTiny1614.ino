@@ -72,7 +72,7 @@ unsigned int getBandgap ()
 {
 #if 0
   analogReference(INTERNAL1V1);
-  uint16_t Vcc_value = 0x400 * 1100L / analogRead(ADC_INTREF); /* calculate the Vcc value */
+  uint16_t Vcc_value = 0x400 * 1100UL / analogRead(ADC_INTREF); /* calculate the Vcc value */
 #else
   VREF.CTRLA = VREF_ADC0REFSEL_1V1_gc;    /* Set the Vref to 1.1V*/
 
@@ -91,7 +91,8 @@ unsigned int getBandgap ()
 
   ADC0.COMMAND |= 1;                  // start running ADC
   while (!(ADC0.INTFLAGS & ADC_RESRDY_bm));
-  Vcc_value = 0x400 * 1100L / ADC0.RES /* calculate the Vcc value */;
+
+  Vcc_value = 0x400 * 1100UL / ADC0.RES /* calculate the Vcc value */;
 #endif
   return Vcc_value;
 } // end of getBandgap
@@ -100,15 +101,15 @@ unsigned int getBandgap ()
 #if 1
 unsigned int getBattery ()
 {
-  int val = analogRead(PIN_PA3);
+  unsigned int val = analogRead(PIN_PA3);
 
   // 3.0v regulator with voltage divider (820k/820k):
   const float Vref = 3000,
               R = 820000,
               Rintern = 100000000, // ATtiny ADC internalresistance
               Rpar = (R * Rintern) / (R + Rintern);
-  const long scale = Vref * (R + Rpar) / Rpar;
-  unsigned int results = scale * val / 1024;
+  const unsigned long scale = Vref * (R + Rpar) / Rpar;
+  unsigned int results = scale * val / 0x400;
 
   return results;
 } // end of getBattery

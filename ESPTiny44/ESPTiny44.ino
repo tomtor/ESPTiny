@@ -105,7 +105,7 @@ unsigned int getBandgap ()
     val = (ADCH << 8) | low;
   }
 
-  unsigned int results = ((long)1024 * 1085) / val;  // 1100 default, 1085 is calibrated value
+  unsigned int results = (0x400 * 1085UL) / val;  // 1100 default, 1085 is calibrated value
 
   cbi(ADCSRA, ADEN);                // switch Analog to Digitalconverter OFF
   sbi(ACSR, ACD);                   //disable the analog comparator

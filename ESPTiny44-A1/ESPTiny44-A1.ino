@@ -105,7 +105,7 @@ unsigned int getBandgap ()
     val = (ADCH << 8) | low;
   }
 
-  unsigned int results = ((long)1024 * 1085) / val;  // 1100 default, 1085 is calibrated value
+  unsigned int results = (0x400 * 1085UL) / val;  // 1100 default, 1085 is calibrated value
 
   cbi(ADCSRA, ADEN);                // switch Analog to Digitalconverter OFF
   sbi(ACSR, ACD);                   // disable the analog comparator
@@ -119,15 +119,15 @@ unsigned int getBattery ()
   sbi(ADCSRA, ADEN);                   // switch Analog to Digitalconverter ON
   cbi(ACSR, ACD);
   
-  int val = analogRead(A1);
+  unsigned int val = analogRead(A1);
 
   // 3.0v regulator with voltage divider (820k/820k):
   const float Vref = 3000,
               R = 820000,
               Rintern = 100000000, // ATtiny ADC internalresistance
               Rpar = (R * Rintern) / (R + Rintern);
-  const long scale = Vref * (R + Rpar) / Rpar;
-  unsigned int results = scale * val / 1024;
+  const unsigned long scale = Vref * (R + Rpar) / Rpar;
+  unsigned int results = scale * val / 0x400;
 
   cbi(ADCSRA, ADEN);                // switch Analog to Digitalconverter OFF
   sbi(ACSR, ACD);                   // disable the analog comparator
