@@ -140,7 +140,7 @@ U 1 1 60CEFE49
 P 1350 3600
 F 0 "J3" H 1458 3881 50  0000 C CNN
 F 1 "Conn_01x04_Male" H 1458 3790 50  0000 C CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Horizontal" H 1350 3600 50  0001 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical" H 1350 3600 50  0001 C CNN
 F 3 "~" H 1350 3600 50  0001 C CNN
 	1    1350 3600
 	1    0    0    -1  
