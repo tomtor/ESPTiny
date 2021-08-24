@@ -17,7 +17,7 @@ is switched off by the ATtiny with CS.
 ![3D rendering](ESPTiny402.png)
 ![3D rendering](ESPTiny402Empty.png)
 
-Usable on breadboard (ATtiny84: 9 rows high, leaves 3 rows empty and ATtiny16x4: 8 rows high) OR stand alone.
+Usable on breadboard (ATtiny84: 9 rows high, leaves 2 rows empty and ATtiny16x4: 8 rows high) OR stand alone.
 
 3 PCB designs: ATtiny84 or ATtiny16x4 or ATtinyx02
 
