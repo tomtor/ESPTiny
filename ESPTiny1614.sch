@@ -6,7 +6,7 @@ encoding utf-8
 Sheet 1 1
 Title "ESP01 Attiny1614 board"
 Date "2021-07-13"
-Rev "1.0"
+Rev "2.0"
 Comp "http://www.v7f.eu"
 Comment1 ""
 Comment2 ""
@@ -549,7 +549,7 @@ F 3 "~" H 3600 4350 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Text Label 3450 4350 2    50   ~ 0
-B3
+A5
 Text Label 3750 4350 0    50   ~ 0
 RST
 $Comp
@@ -677,4 +677,21 @@ $EndComp
 Connection ~ 5800 4600
 Wire Wire Line
 	5800 4600 5450 4600
+$Comp
+L Device:Crystal Y1
+U 1 1 6124C799
+P 2100 5950
+F 0 "Y1" H 2100 6218 50  0000 C CNN
+F 1 "Crystal 32.768kHz" H 2100 6127 50  0000 C CNN
+F 2 "Crystal:Crystal_Round_D3.0mm_Vertical" H 2100 5950 50  0001 C CNN
+F 3 "~" H 2100 5950 50  0001 C CNN
+	1    2100 5950
+	1    0    0    -1  
+$EndComp
+Text Label 1950 5950 2    50   ~ 0
+B2
+Text Label 2250 5950 0    50   ~ 0
+B3
+Text Notes 2500 5950 0    50   ~ 0
+Optional crystal
 $EndSCHEMATC
