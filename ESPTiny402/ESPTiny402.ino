@@ -39,29 +39,32 @@ void sleepDelay(uint16_t n)
 
 #if 0
   if (n < 10) {
-  	period = RTC_PERIOD_CYC4_gc; // 1/8 ms
-	  ticks = (n << 3);
+    period = RTC_PERIOD_CYC4_gc; // 1/8 ms
+    ticks = (n << 3);
   } else
 #endif
-  if (n < 100) {
-  	period = RTC_PERIOD_CYC8_gc; // 1/4 ms
-	  ticks = (n << 2);
-  } else if (n < 1000) {
-  	period = RTC_PERIOD_CYC64_gc; // 2 ms
-	  ticks = (n >> 1);
-  } else {
-  	period = RTC_PERIOD_CYC1024_gc; // 32 ms
-	  ticks = (n >> 5);
-  }
-  
+    if (n < 100) {
+      period = RTC_PERIOD_CYC8_gc; // 1/4 ms
+      ticks = (n << 2);
+    } else if (n < 1000) {
+      period = RTC_PERIOD_CYC64_gc; // 2 ms
+      ticks = (n >> 1);
+    } else if (n < 5000) {
+      period = RTC_PERIOD_CYC1024_gc; // 32 ms
+      ticks = (n >> 5);
+    } else {
+      period = RTC_PERIOD_CYC8192_gc; // 256 ms
+      ticks = (n >> 8);
+    }
+
   while (RTC.PITSTATUS & RTC_CTRLBUSY_bm)  // Wait for new settings to synchronize
     ;
-      
+
   RTC.PITCTRLA = period | RTC_PITEN_bm;    // Enable PIT counter: enabled
-  
+
   while (RTC.PITSTATUS & RTC_CTRLBUSY_bm)  // Wait for new settings to synchronize
     ;
-  
+
   while (ticks--)
     sleep_cpu();
 
@@ -137,14 +140,14 @@ void setup() {
   pinMode(PIN_PA1, INPUT_PULLUP);
   pinMode(PIN_PA2, INPUT_PULLUP);
   pinMode(PIN_PA3, INPUT_PULLUP);
-  pinMode(PIN_PA4, INPUT_PULLUP);
-  pinMode(PIN_PA5, INPUT_PULLUP);
+  //  pinMode(PIN_PA4, INPUT_PULLUP);
+  //  pinMode(PIN_PA5, INPUT_PULLUP);
   pinMode(PIN_PA6, INPUT_PULLUP);
   pinMode(PIN_PA7, INPUT_PULLUP);
-  pinMode(PIN_PB0, INPUT_PULLUP);
-  pinMode(PIN_PB1, INPUT_PULLUP);
-  pinMode(PIN_PB2, INPUT_PULLUP);
-  pinMode(PIN_PB3, INPUT_PULLUP);
+  //  pinMode(PIN_PB0, INPUT_PULLUP);
+  //  pinMode(PIN_PB1, INPUT_PULLUP);
+  //  pinMode(PIN_PB2, INPUT_PULLUP);
+  //  pinMode(PIN_PB3, INPUT_PULLUP);
 
   pinMode(led, OUTPUT);
 
@@ -174,7 +177,7 @@ void requestEvent() {
 
 // the loop routine runs over and over again forever:
 void loop() {
-  
+
   //unsigned int v = voltage = getBattery();
   unsigned int v = voltage = getBandgap();
   blinkN(v / 1000);
@@ -182,10 +185,10 @@ void loop() {
   blinkN((v % 1000) / 100);
   sleepDelay(1500);
   blinkN((v % 100) / 10);
-  
+
   for (byte l = 0; l < 300000 / (5000 + 2 + 700); l++) {  // 300s / delay per loop (5000 + blink time)
-	sleepDelay(5000);
-	blinkN(1);
+    sleepDelay(5000);
+    blinkN(1);
   }
 
 #if USE_BME
@@ -206,7 +209,7 @@ void loop() {
   oldtemp = temp;
 #endif
 #endif
-  
+
 #if USE_ESP
   digitalWrite(reset_ESP, LOW);
   pinMode(reset_ESP, OUTPUT);
@@ -214,7 +217,7 @@ void loop() {
   pinMode(reset_ESP, INPUT_PULLUP);
 
   sleepDelay(3000);
-  
+
   auto startcnt = cnt;
 
   Wire.begin(1);                // join i2c bus with address #1
