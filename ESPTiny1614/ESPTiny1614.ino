@@ -24,11 +24,38 @@ void RTC_init(void)
   RTC.CLKSEL = RTC_CLKSEL_INT32K_gc;    /* 32.768kHz Internal Ultra-Low-Power Oscillator (OSCULP32K) */
 
   RTC.PITINTCTRL = RTC_PI_bm;           /* PIT Interrupt: enabled */
+
+  // For 2s overflow ticks while sleeping:
+  RTC.INTCTRL = RTC_OVF_bm;
+  RTC.CTRLA = RTC_PRESCALER_DIV1_gc | RTC_RUNSTDBY_bm | RTC_RTCEN_bm;
 }
 
 ISR(RTC_PIT_vect)
 {
   RTC.PITINTFLAGS = RTC_PI_bm;          /* Clear interrupt flag by writing '1' (required) */
+}
+
+
+volatile byte sec2s, hours, minutes; // 2s ticks
+
+ISR(RTC_CNT_vect)
+{
+  if (sec2s < 58)
+    sec2s += 2;
+  else {
+    sec2s = 0;
+    if (minutes < 59)
+      minutes++;
+    else {
+      minutes = 0;
+      if (hours < 23)
+        hours++;
+      else
+        hours = 0;
+    }  
+  }
+
+  RTC.INTFLAGS = RTC_OVF_bm;          /* Clear interrupt flag by writing '1' (required) */
 }
 
 
@@ -39,29 +66,32 @@ void sleepDelay(uint16_t n)
 
 #if 0
   if (n < 10) {
-  	period = RTC_PERIOD_CYC4_gc; // 1/8 ms
-	  ticks = (n << 3);
+    period = RTC_PERIOD_CYC4_gc; // 1/8 ms
+    ticks = (n << 3);
   } else
 #endif
   if (n < 100) {
-  	period = RTC_PERIOD_CYC8_gc; // 1/4 ms
-	  ticks = (n << 2);
+      period = RTC_PERIOD_CYC8_gc; // 1/4 ms
+      ticks = (n << 2);
   } else if (n < 1000) {
-  	period = RTC_PERIOD_CYC64_gc; // 2 ms
-	  ticks = (n >> 1);
+      period = RTC_PERIOD_CYC64_gc; // 2 ms
+      ticks = (n >> 1);
+  } else if (n < 5000) {
+      period = RTC_PERIOD_CYC1024_gc; // 32 ms
+      ticks = (n >> 5);
   } else {
-  	period = RTC_PERIOD_CYC1024_gc; // 32 ms
-	  ticks = (n >> 5);
+      period = RTC_PERIOD_CYC8192_gc; // 256 ms
+      ticks = (n >> 8);
   }
-  
+
   while (RTC.PITSTATUS & RTC_CTRLBUSY_bm)  // Wait for new settings to synchronize
     ;
-      
+
   RTC.PITCTRLA = period | RTC_PITEN_bm;    // Enable PIT counter: enabled
-  
+
   while (RTC.PITSTATUS & RTC_CTRLBUSY_bm)  // Wait for new settings to synchronize
     ;
-  
+
   while (ticks--)
     sleep_cpu();
 
@@ -131,7 +161,8 @@ void blinkN(uint8_t n, uint8_t l = led)
 // the setup routine runs once when you press reset:
 void setup() {
   RTC_init();                           /* Initialize the RTC timer */
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN);  /* Set sleep mode to POWER DOWN mode */
+  //set_sleep_mode(SLEEP_MODE_PWR_DOWN);  /* Set sleep mode to POWER DOWN mode */
+  set_sleep_mode(SLEEP_MODE_STANDBY);
   sleep_enable();                       /* Enable sleep mode, but not going to sleep yet */
 
   pinMode(PIN_PA1, INPUT_PULLUP);
@@ -174,7 +205,7 @@ void requestEvent() {
 
 // the loop routine runs over and over again forever:
 void loop() {
-  
+
   //unsigned int v = voltage = getBattery();
   unsigned int v = voltage = getBandgap();
   blinkN(v / 1000);
@@ -182,11 +213,18 @@ void loop() {
   blinkN((v % 1000) / 100);
   sleepDelay(1500);
   blinkN((v % 100) / 10);
-  
+
+#if 1
   for (byte l = 0; l < 300000 / (5000 + 2 + 700); l++) {  // 300s / delay per loop (5000 + blink time)
-	sleepDelay(5000);
-	blinkN(1);
+    sleepDelay(5000);
+    blinkN(1);
   }
+#else
+  for (byte l = 0; l < 600; l++) {
+    sleepDelay(100);
+    digitalWriteFast(led, sec2s % 10 == 0 ? HIGH: LOW);
+  }
+#endif
 
 #if USE_BME
   Wire.begin(1);                // join i2c bus with address #1
@@ -206,7 +244,7 @@ void loop() {
   oldtemp = temp;
 #endif
 #endif
-  
+
 #if USE_ESP
   digitalWrite(reset_ESP, LOW);
   pinMode(reset_ESP, OUTPUT);
@@ -214,7 +252,7 @@ void loop() {
   pinMode(reset_ESP, INPUT_PULLUP);
 
   sleepDelay(3000);
-  
+
   auto startcnt = cnt;
 
   Wire.begin(1);                // join i2c bus with address #1
