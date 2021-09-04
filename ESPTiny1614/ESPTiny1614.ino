@@ -1,12 +1,17 @@
 #define led       PIN_PA7
-#define reset_ESP PIN_PB3
 
+// #define reset_ESP PIN_PB3
+#define reset_ESP PIN_PA5
+
+#define USE_BME  0
+#define USE_ESP 0
+
+#if USE_ESP || USE_BME
 #include <Wire.h>
+#endif
 
 #include <avr/sleep.h>
 
-#define USE_BME	0
-#define USE_ESP 0
 
 #if USE_BME
 #include <BME280I2C.h>
@@ -21,7 +26,11 @@ void RTC_init(void)
   {
     ;                                   /* Wait for all register to be synchronized */
   }
+#if 1
   RTC.CLKSEL = RTC_CLKSEL_INT32K_gc;    /* 32.768kHz Internal Ultra-Low-Power Oscillator (OSCULP32K) */
+#else  
+  RTC.CLKSEL = RTC_CLKSEL_TOSC32K_gc;   /* 32.768kHz External Oscillator */
+#endif
 
   RTC.PITINTCTRL = RTC_PI_bm;           /* PIT Interrupt: enabled */
 
@@ -158,6 +167,15 @@ void blinkN(uint8_t n, uint8_t l = led)
 }
 
 
+void blinkDec(uint8_t d)
+{
+  blinkN(d / 10);
+  sleepDelay(1500);
+  blinkN(d % 10);
+  sleepDelay(3000);
+}
+
+
 // the setup routine runs once when you press reset:
 void setup() {
   RTC_init();                           /* Initialize the RTC timer */
@@ -191,6 +209,7 @@ unsigned voltage;
 
 volatile unsigned cnt;
 
+#if USE_ESP
 // function that executes whenever data is requested by master
 // this function is registered as an event
 void requestEvent() {
@@ -201,6 +220,7 @@ void requestEvent() {
 
   ++cnt;
 }
+#endif
 
 
 // the loop routine runs over and over again forever:
@@ -208,23 +228,17 @@ void loop() {
 
   //unsigned int v = voltage = getBattery();
   unsigned int v = voltage = getBandgap();
-  blinkN(v / 1000);
-  sleepDelay(1500);
-  blinkN((v % 1000) / 100);
-  sleepDelay(1500);
-  blinkN((v % 100) / 10);
+  blinkDec((v + 50) / 100);
 
-#if 1
-  for (byte l = 0; l < 300000 / (5000 + 2 + 700); l++) {  // 300s / delay per loop (5000 + blink time)
+  //blinkDec(hours / 24);
+  blinkDec(hours % 24);
+  blinkDec(minutes);
+  blinkDec(sec2s);
+
+  for (byte l = 0; l < 60000 / (5000 + 2 + 700); l++) {  // 60s / delay per loop (5000 + blink time)
     sleepDelay(5000);
     blinkN(1);
   }
-#else
-  for (byte l = 0; l < 600; l++) {
-    sleepDelay(100);
-    digitalWriteFast(led, sec2s % 10 == 0 ? HIGH: LOW);
-  }
-#endif
 
 #if USE_BME
   Wire.begin(1);                // join i2c bus with address #1
