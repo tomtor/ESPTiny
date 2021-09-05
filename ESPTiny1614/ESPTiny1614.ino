@@ -39,13 +39,18 @@ void RTC_init(void)
   RTC.CTRLA = RTC_PRESCALER_DIV1_gc | RTC_RUNSTDBY_bm | RTC_RTCEN_bm;
 }
 
+
+volatile uint16_t ticks;
+
 ISR(RTC_PIT_vect)
 {
+  if (ticks)
+    ticks--;
   RTC.PITINTFLAGS = RTC_PI_bm;          /* Clear interrupt flag by writing '1' (required) */
 }
 
 
-volatile byte sec2s, hours, minutes; // 2s ticks
+volatile uint8_t sec2s, hours, minutes; // 2s ticks
 
 ISR(RTC_CNT_vect)
 {
@@ -70,7 +75,6 @@ ISR(RTC_CNT_vect)
 
 void sleepDelay(uint16_t n)
 {
-  uint16_t ticks;
   uint8_t period;
 
 #if 0
@@ -101,7 +105,7 @@ void sleepDelay(uint16_t n)
   while (RTC.PITSTATUS & RTC_CTRLBUSY_bm)  // Wait for new settings to synchronize
     ;
 
-  while (ticks--)
+  while (ticks)
     sleep_cpu();
 
   RTC.PITCTRLA = 0;    /* Disable PIT counter */
@@ -230,14 +234,12 @@ void loop() {
   unsigned int v = voltage = getBandgap();
   blinkDec((v + 50) / 100);
 
-  //blinkDec(hours / 24);
-  blinkDec(hours % 24);
   blinkDec(minutes);
   blinkDec(sec2s);
 
   for (byte l = 0; l < 60000 / (5000 + 2 + 700); l++) {  // 60s / delay per loop (5000 + blink time)
-    sleepDelay(5000);
     blinkN(1);
+    sleepDelay(5000);
   }
 
 #if USE_BME
