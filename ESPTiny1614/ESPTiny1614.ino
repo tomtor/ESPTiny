@@ -235,11 +235,14 @@ void loop() {
   blinkDec((v + 50) / 100);
 
   blinkDec(minutes);
-  blinkDec(sec2s);
 
-  for (byte l = 0; l < 60000 / (5000 + 2 + 700); l++) {  // 60s / delay per loop (5000 + blink time)
-    blinkN(1);
-    sleepDelay(5000);
+  sleepDelay(5000);
+  while (sec2s != 0) {
+    if (sec2s % 10 == 0 && sec2s <= 55) {
+      blinkN(1);
+      sleepDelay(9000);
+    } else
+      sleepDelay(100);
   }
 
 #if USE_BME
