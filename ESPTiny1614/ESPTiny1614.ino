@@ -6,6 +6,8 @@
 #define USE_BME  0
 #define USE_ESP 0
 
+#define USE_OSC 0
+
 #if USE_ESP || USE_BME
 #include <Wire.h>
 #endif
@@ -26,9 +28,33 @@ void RTC_init(void)
   {
     ;                                   /* Wait for all register to be synchronized */
   }
-#if 1
+#if USE_OSC
   RTC.CLKSEL = RTC_CLKSEL_INT32K_gc;    /* 32.768kHz Internal Ultra-Low-Power Oscillator (OSCULP32K) */
-#else  
+#else
+#if 0
+  uint8_t temp;
+  
+  temp = CLKCTRL.XOSC32KCTRLA;
+  temp &= ~CLKCTRL_ENABLE_bm;
+  _PROTECTED_WRITE(CLKCTRL.XOSC32KCTRLA, temp);
+
+  while(CLKCTRL.MCLKSTATUS & CLKCTRL_XOSC32KS_bm) ;
+
+  temp = CLKCTRL.XOSC32KCTRLA;
+  temp &= ~CLKCTRL_SEL_bm;
+  _PROTECTED_WRITE(CLKCTRL.XOSC32KCTRLA, temp);
+
+  /* Enable oscillator: */
+  temp = CLKCTRL.XOSC32KCTRLA;
+  temp |= CLKCTRL_ENABLE_bm;
+  /* Writing to protected register */
+  _PROTECTED_WRITE(CLKCTRL.XOSC32KCTRLA, temp);
+#else
+  _PROTECTED_WRITE(CLKCTRL.XOSC32KCTRLA, 0x3);
+#endif
+
+  while (RTC.STATUS > 0) ;
+
   RTC.CLKSEL = RTC_CLKSEL_TOSC32K_gc;   /* 32.768kHz External Oscillator */
 #endif
 
@@ -36,6 +62,7 @@ void RTC_init(void)
 
   // For 2s overflow ticks while sleeping:
   RTC.INTCTRL = RTC_OVF_bm;
+  
   RTC.CTRLA = RTC_PRESCALER_DIV1_gc | RTC_RUNSTDBY_bm | RTC_RTCEN_bm;
 }
 
@@ -130,7 +157,7 @@ unsigned int getBandgap ()
   uint16_t Vcc_value = 0;                /* measured Vcc value */
 
   ADC0.CTRLA = 1 << ADC_ENABLE_bp     /* ADC Enable: enabled */
-               | 1 << ADC_FREERUN_bp  /* ADC Free run mode: enabled */
+               //| 1 << ADC_FREERUN_bp  /* ADC Free run mode: enabled */
                | ADC_RESSEL_10BIT_gc; /* 10-bit mode */
 
   ADC0.COMMAND |= 1;                  // start running ADC
@@ -196,8 +223,10 @@ void setup() {
   pinMode(PIN_PA7, INPUT_PULLUP);
   pinMode(PIN_PB0, INPUT_PULLUP);
   pinMode(PIN_PB1, INPUT_PULLUP);
+#if !USE_OSC
   pinMode(PIN_PB2, INPUT_PULLUP);
   pinMode(PIN_PB3, INPUT_PULLUP);
+#endif
 
   pinMode(led, OUTPUT);
 
@@ -230,6 +259,7 @@ void requestEvent() {
 // the loop routine runs over and over again forever:
 void loop() {
 
+  //delay(1);
   //unsigned int v = voltage = getBattery();
   unsigned int v = voltage = getBandgap();
   blinkDec((v + 50) / 100);
