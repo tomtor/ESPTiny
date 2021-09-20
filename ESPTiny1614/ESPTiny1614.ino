@@ -165,6 +165,7 @@ unsigned int getBandgap ()
 
   Vcc_value = 0x400 * 1100UL / ADC0.RES /* calculate the Vcc value */;
 #endif
+  ADC0.CTRLA = 0;
   return Vcc_value;
 } // end of getBandgap
 #endif
