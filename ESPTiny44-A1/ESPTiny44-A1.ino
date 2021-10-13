@@ -200,6 +200,9 @@ void loop() {
     blinkN(1);
   }
 
+  if (v < 3400)
+    return;
+
 #if 1
   digitalWrite(reset_ESP, LOW);
   pinMode(reset_ESP, OUTPUT);

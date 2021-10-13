@@ -1,4 +1,5 @@
 #define led       PIN_PA7
+#define ON_TIME   4
 
 // #define reset_ESP PIN_PB3
 #define reset_ESP PIN_PA5
@@ -81,19 +82,27 @@ volatile uint8_t sec2s, hours, minutes; // 2s ticks
 
 ISR(RTC_CNT_vect)
 {
-  if (sec2s < 58)
-    sec2s += 2;
+  static unsigned int adjust_ticks;
+
+  // Our clock is almost 1 sec too fast every 24 hours:
+  // 24 * 3600 / 2 = 43200 for exactly 1 sec too fast
+  if (++adjust_ticks == 45000)
+    adjust_ticks = 0;
   else {
-    sec2s = 0;
-    if (minutes < 59)
-      minutes++;
+    if (sec2s < 58)
+      sec2s += 2;
     else {
-      minutes = 0;
-      if (hours < 23)
-        hours++;
-      else
-        hours = 0;
-    }  
+      sec2s = 0;
+      if (minutes < 59)
+        minutes++;
+      else {
+        minutes = 0;
+        if (hours < 23)
+          hours++;
+        else
+          hours = 0;
+      }  
+    }
   }
 
   RTC.INTFLAGS = RTC_OVF_bm;          /* Clear interrupt flag by writing '1' (required) */
@@ -192,7 +201,7 @@ void blinkN(uint8_t n, uint8_t l = led)
 {
   for (uint8_t i = 0; i < n; i++) {
     digitalWrite(l, HIGH);
-    sleepDelay(2);
+    sleepDelay(ON_TIME);
     digitalWrite(l, LOW);
     sleepDelay(700);
   }
