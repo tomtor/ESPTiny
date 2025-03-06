@@ -9,6 +9,13 @@
 
 #define USE_OSC 0
 
+// Slowdown 2 sec every 24 hours:
+// 24 * 3600 / 2 = 43200 ticks with 2 second interval in 24 hours.
+// Adjustment is in steps of 2 seconds (a ticks increments the clock with 2 seconds).
+
+#define ADJUST 80000 // Slightly less than 1 second every 24 hours
+
+
 #if USE_ESP || USE_BME
 #include <Wire.h>
 #endif
@@ -84,11 +91,18 @@ ISR(RTC_CNT_vect)
 {
   static unsigned int adjust_ticks;
 
-  // Our clock is almost 1 sec too fast every 24 hours:
-  // 24 * 3600 / 2 = 43200 for exactly 1 sec too fast
-  if (++adjust_ticks == 45000)
+#if ADJUST > 0
+  if (++adjust_ticks == ADJUST) {
     adjust_ticks = 0;
-  else {
+  } else {
+#elif ADJUST < 0
+  if (++adjust_ticks >= -ADJUST && sec2s == 0) {
+    adjust_ticks = 0;
+    sec2s = 4;
+  } else {
+#else
+  {
+#endif
     if (sec2s < 58)
       sec2s += 2;
     else {
@@ -119,7 +133,7 @@ void sleepDelay(uint16_t n)
     ticks = (n << 3);
   } else
 #endif
-  if (n < 100) {
+  if (n < 10) {
       period = RTC_PERIOD_CYC8_gc; // 1/4 ms
       ticks = (n << 2);
   } else if (n < 1000) {
@@ -150,9 +164,10 @@ void sleepDelay(uint16_t n)
 #if 1
 unsigned int getBandgap ()
 {
-#if 0
-  analogReference(INTERNAL1V1);
-  uint16_t Vcc_value = 0x400 * 1100UL / analogRead(ADC_INTREF); /* calculate the Vcc value */
+#if 1
+  analogReference(INTERNAL1V024);
+  analogRead(ADC_VDDDIV10); // drop first
+  return analogRead(ADC_VDDDIV10);
 #else
   VREF.CTRLA = VREF_ADC0REFSEL_1V1_gc;    /* Set the Vref to 1.1V*/
 
@@ -174,8 +189,8 @@ unsigned int getBandgap ()
 
   Vcc_value = 0x400 * 1100UL / ADC0.RES /* calculate the Vcc value */;
 #endif
-  ADC0.CTRLA = 0;
-  return Vcc_value;
+  // ADC0.CTRLA = 0;
+  // return Vcc_value;
 } // end of getBandgap
 #endif
 
@@ -266,7 +281,8 @@ void requestEvent() {
 #endif
 
 
-// the loop routine runs over and over again forever:
+// the loop routine runs over and over again forever:TRLA = 0;
+  // return 
 void loop() {
 
   //delay(1);
