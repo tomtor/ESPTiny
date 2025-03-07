@@ -144,10 +144,10 @@ void sleepDelay(uint16_t n)
 #if 1
 unsigned int getBandgap ()
 {
-  analogReference(INTERNAL2V5);
+  analogReference(INTERNAL1V1);
   analogReference(VDD);
   analogRead(ADC_INTREF); // drop first
-  return analogRead(ADC_INTREF);
+  return 0x400 * 1100UL / analogRead(ADC_INTREF);
 } // end of getBandgap
 #endif
 
