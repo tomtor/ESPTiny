@@ -1,5 +1,5 @@
 #define led       PIN_PA7
-#define ON_TIME   4
+#define ON_TIME   3
 
 // #define reset_ESP PIN_PB3
 #define reset_ESP PIN_PA5
@@ -13,7 +13,7 @@
 // 24 * 3600 / 2 = 43200 ticks with 2 second interval in 24 hours.
 // Adjustment is in steps of 2 seconds (a ticks increments the clock with 2 seconds).
 
-#define ADJUST 80000 // Slightly less than 1 second every 24 hours
+//#define ADJUST 65535 // Slightly less than 1 second every 24 hours
 
 
 #if USE_ESP || USE_BME
@@ -144,9 +144,10 @@ void sleepDelay(uint16_t n)
 #if 1
 unsigned int getBandgap ()
 {
-  analogReference(INTERNAL1V024);
-  analogRead(ADC_VDDDIV10); // drop first
-  return analogRead(ADC_VDDDIV10);
+  analogReference(INTERNAL2V5);
+  analogReference(VDD);
+  analogRead(ADC_INTREF); // drop first
+  return analogRead(ADC_INTREF);
 } // end of getBandgap
 #endif
 
@@ -167,6 +168,14 @@ unsigned int getBattery ()
 } // end of getBattery
 #endif
 
+
+void testDelay(unsigned n, uint8_t l = led)
+{
+  digitalWrite(l, HIGH);
+  sleepDelay(n);
+  digitalWrite(l, LOW);
+  sleepDelay(3);
+}
 
 void blinkN(uint8_t n, uint8_t l = led)
 {
@@ -214,6 +223,9 @@ void setup() {
     blinkN(1, led);
   }
 
+  sleepDelay(1000);
+  for (int d= 1; d <= 10; d++)
+    testDelay(d);
   sleepDelay(5000);
 }
 
