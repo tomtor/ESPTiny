@@ -200,7 +200,7 @@ void loop() {
     blinkN(1);
   }
 
-  if (v < 3400)
+  if (v < 3550)
     return;
 
 #if 1
@@ -218,7 +218,7 @@ void loop() {
   Wire.begin(1);                // join i2c bus with address #1
   Wire.onRequest(requestEvent); // register event
   
-  auto end = millis() + 4000;
+  auto end = millis() + 6000;
   while (cnt == startcnt && millis() < end)
     ;
   delay(200);
