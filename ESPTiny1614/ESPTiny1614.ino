@@ -39,27 +39,7 @@ void RTC_init(void)
 #if USE_OSC
   RTC.CLKSEL = RTC_CLKSEL_INT32K_gc;    /* 32.768kHz Internal Ultra-Low-Power Oscillator (OSCULP32K) */
 #else
-#if 0
-  uint8_t temp;
-  
-  temp = CLKCTRL.XOSC32KCTRLA;
-  temp &= ~CLKCTRL_ENABLE_bm;
-  _PROTECTED_WRITE(CLKCTRL.XOSC32KCTRLA, temp);
-
-  while(CLKCTRL.MCLKSTATUS & CLKCTRL_XOSC32KS_bm) ;
-
-  temp = CLKCTRL.XOSC32KCTRLA;
-  temp &= ~CLKCTRL_SEL_bm;
-  _PROTECTED_WRITE(CLKCTRL.XOSC32KCTRLA, temp);
-
-  /* Enable oscillator: */
-  temp = CLKCTRL.XOSC32KCTRLA;
-  temp |= CLKCTRL_ENABLE_bm;
-  /* Writing to protected register */
-  _PROTECTED_WRITE(CLKCTRL.XOSC32KCTRLA, temp);
-#else
   _PROTECTED_WRITE(CLKCTRL.XOSC32KCTRLA, 0x3);
-#endif
 
   while (RTC.STATUS > 0) ;
 
@@ -164,47 +144,23 @@ void sleepDelay(uint16_t n)
 #if 1
 unsigned int getBandgap ()
 {
-#if 1
   analogReference(INTERNAL1V024);
   analogRead(ADC_VDDDIV10); // drop first
   return analogRead(ADC_VDDDIV10);
-#else
-  VREF.CTRLA = VREF_ADC0REFSEL_1V1_gc;    /* Set the Vref to 1.1V*/
-
-  /* The following section is partially taken from Microchip App Note AN2447 page 13*/
-
-  ADC0.MUXPOS = ADC_MUXPOS_INTREF_gc    /* ADC internal reference, the Vbg*/;
-  ADC0.CTRLC = ADC_PRESC_DIV4_gc        /* CLK_PER divided by 4 */
-               | ADC_REFSEL_VDDREF_gc   /* Vdd (Vcc) be ADC reference */
-               | 0 << ADC_SAMPCAP_bp;   /* Sample Capacitance Selection: disabled */
-
-  uint16_t Vcc_value = 0;                /* measured Vcc value */
-
-  ADC0.CTRLA = 1 << ADC_ENABLE_bp     /* ADC Enable: enabled */
-               //| 1 << ADC_FREERUN_bp  /* ADC Free run mode: enabled */
-               | ADC_RESSEL_10BIT_gc; /* 10-bit mode */
-
-  ADC0.COMMAND |= 1;                  // start running ADC
-  while (!(ADC0.INTFLAGS & ADC_RESRDY_bm));
-
-  Vcc_value = 0x400 * 1100UL / ADC0.RES /* calculate the Vcc value */;
-#endif
-  // ADC0.CTRLA = 0;
-  // return Vcc_value;
 } // end of getBandgap
 #endif
 
 #if 1
 unsigned int getBattery ()
 {
+  analogReference(VDD);
+
+  analogRead(PIN_PA3);
   unsigned int val = analogRead(PIN_PA3);
 
-  // 3.0v regulator with voltage divider (820k/820k):
-  const float Vref = 3000,
-              R = 820000,
-              Rintern = 100000000, // ATtiny ADC internalresistance
-              Rpar = (R * Rintern) / (R + Rintern);
-  const unsigned long scale = Vref * (R + Rpar) / Rpar;
+  // 3.3v regulator with voltage divider (820k/820k):
+  const float Vref = 3300;
+  const unsigned long scale = Vref*2;
   unsigned int results = scale * val / 0x400;
 
   return results;
@@ -235,7 +191,6 @@ void blinkDec(uint8_t d)
 // the setup routine runs once when you press reset:
 void setup() {
   RTC_init();                           /* Initialize the RTC timer */
-  //set_sleep_mode(SLEEP_MODE_PWR_DOWN);  /* Set sleep mode to POWER DOWN mode */
   set_sleep_mode(SLEEP_MODE_STANDBY);
   sleep_enable();                       /* Enable sleep mode, but not going to sleep yet */
 
