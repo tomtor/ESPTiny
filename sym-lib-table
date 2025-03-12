@@ -1,4 +1,9 @@
 (sym_lib_table
-  (lib (name ESP8266)(type Legacy)(uri ${KIPRJMOD}/libraries/kicad-ESP8266/ESP8266.lib)(options "")(descr ""))
-  (lib (name MyJumper)(type Legacy)(uri ${KIPRJMOD}/libraries/MyJumper.lib)(options "")(descr ""))
+  (version 7)
+  (lib (name "ESP8266")(type "Legacy")(uri "${KIPRJMOD}/libraries/kicad-ESP8266/ESP8266.lib")(options "")(descr ""))
+  (lib (name "MyJumper")(type "Legacy")(uri "${KIPRJMOD}/libraries/MyJumper.lib")(options "")(descr ""))
+  (lib (name "ESPTiny1614-rescue")(type "KiCad")(uri "${KIPRJMOD}/ESPTiny1614-rescue.kicad_sym")(options "")(descr ""))
+  (lib (name "ESPTiny402-SOT89-rescue")(type "KiCad")(uri "${KIPRJMOD}/ESPTiny402-SOT89-rescue.kicad_sym")(options "")(descr ""))
+  (lib (name "ESPTiny402-rescue")(type "KiCad")(uri "${KIPRJMOD}/ESPTiny402-rescue.kicad_sym")(options "")(descr ""))
+  (lib (name "ESPTiny-rescue")(type "KiCad")(uri "${KIPRJMOD}/ESPTiny-rescue.kicad_sym")(options "")(descr ""))
 )
