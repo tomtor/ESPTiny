@@ -14,48 +14,57 @@
 BME280I2C bme;
 #endif
 
+#define SLEEPINT
+
 void RTC_init(void)
 {
   /* Initialize RTC: */
   while (RTC.STATUS > 0)
-  {
     ;                                   /* Wait for all register to be synchronized */
-  }
   RTC.CLKSEL = RTC_CLKSEL_INT32K_gc;    /* 32.768kHz Internal Ultra-Low-Power Oscillator (OSCULP32K) */
 
+  // RTC.PITCTRLA |= RTC_PITEN_bm; // PIT must be enabled, erratum?
+  RTC.CTRLA |= RTC_RTCEN_bm | RTC_RUNSTDBY_bm;
+#ifndef SLEEPINT
   RTC.PITINTCTRL = RTC_PI_bm;           /* PIT Interrupt: enabled */
+#endif
 }
 
+#ifdef SLEEPINT
+volatile uint8_t sleep_cnt;
+
+ISR(RTC_CNT_vect)
+{
+  RTC.INTFLAGS = RTC_CMP_bm;            /* Clear interrupt flag by writing '1' (required) */
+  sleep_cnt--;
+}
+#else
 ISR(RTC_PIT_vect)
 {
   RTC.PITINTFLAGS = RTC_PI_bm;          /* Clear interrupt flag by writing '1' (required) */
 }
+#endif
 
 
 void sleepDelay(uint16_t n)
 {
+#ifndef SLEEPINT
   uint16_t ticks;
   uint8_t period;
 
-#if 0
-  if (n < 10) {
-    period = RTC_PERIOD_CYC4_gc; // 1/8 ms
-    ticks = (n << 3);
-  } else
-#endif
-    if (n < 100) {
+  if (n < 100) {
       period = RTC_PERIOD_CYC8_gc; // 1/4 ms
       ticks = (n << 2);
-    } else if (n < 1000) {
+  } else if (n < 1000) {
       period = RTC_PERIOD_CYC64_gc; // 2 ms
       ticks = (n >> 1);
-    } else if (n < 5000) {
+  } else if (n < 5000) {
       period = RTC_PERIOD_CYC1024_gc; // 32 ms
       ticks = (n >> 5);
-    } else {
+  } else {
       period = RTC_PERIOD_CYC8192_gc; // 256 ms
       ticks = (n >> 8);
-    }
+  }
 
   while (RTC.PITSTATUS & RTC_CTRLBUSY_bm)  // Wait for new settings to synchronize
     ;
@@ -69,6 +78,19 @@ void sleepDelay(uint16_t n)
     sleep_cpu();
 
   RTC.PITCTRLA = 0;    /* Disable PIT counter */
+#else
+  while (RTC.STATUS /* & RTC_CMPBUSY_bm */)  // Wait for new settings to synchronize
+    ;
+  RTC.CMP = RTC.CNT + n * 32;
+  while (RTC.STATUS /* & RTC_CMPBUSY_bm*/)  // Wait for new settings to synchronize
+    ;
+  RTC.INTCTRL |= RTC_CMP_bm;
+  sleep_cnt = n / 2048 + 1; // should be 2000, but we don't care for longer delays
+  while (sleep_cnt)
+    sleep_cpu();
+
+  RTC.INTCTRL &= ~RTC_CMP_bm;
+#endif
 }
 
 #if 1
@@ -123,9 +145,9 @@ unsigned int getBattery ()
 void blinkN(uint8_t n, uint8_t l = led)
 {
   for (uint8_t i = 0; i < n; i++) {
-    digitalWrite(l, HIGH);
+    digitalWriteFast(l, HIGH);
     sleepDelay(2);
-    digitalWrite(l, LOW);
+    digitalWriteFast(l, LOW);
     sleepDelay(700);
   }
 }
@@ -134,7 +156,7 @@ void blinkN(uint8_t n, uint8_t l = led)
 // the setup routine runs once when you press reset:
 void setup() {
   RTC_init();                           /* Initialize the RTC timer */
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN);  /* Set sleep mode to POWER DOWN mode */
+  set_sleep_mode(SLEEP_MODE_STANDBY);
   sleep_enable();                       /* Enable sleep mode, but not going to sleep yet */
 
   pinMode(PIN_PA1, INPUT_PULLUP);
@@ -186,10 +208,18 @@ void loop() {
   sleepDelay(1500);
   blinkN((v % 100) / 10);
 
-  for (byte l = 0; l < 300000 / (5000 + 2 + 700); l++) {  // 300s / delay per loop (5000 + blink time)
-    sleepDelay(5000);
-    blinkN(1);
+  // for (byte l = 0; l < 300000 / (5000 + 2 + 700); l++) {  // 300s / delay per loop (5000 + blink time)
+  //   sleepDelay(5000);
+  //   blinkN(1);
+  // }
+  sleepDelay(2000);
+  for (int i= 1; i <= 10; i++) {
+    sleepDelay(1000);
+    digitalWriteFast(led, HIGH);
+    sleepDelay(i * 100);
+    digitalWriteFast(led, LOW);
   }
+  sleepDelay(20000);
 
 #if USE_BME
   Wire.begin(1);                // join i2c bus with address #1
