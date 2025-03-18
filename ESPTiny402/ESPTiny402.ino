@@ -1,15 +1,17 @@
-#include <Event.h>
-#include <Logic.h>
+// #include <Event.h>
+// #include <Logic.h>
+
+#include <avr/sleep.h>
 
 #define led       PIN_PA7
 #define reset_ESP PIN_PB3
 
-#include <Wire.h>
-
-#include <avr/sleep.h>
-
 #define USE_BME	0
 #define USE_ESP 0
+
+#if USE_ESP
+#include <Wire.h>
+#endif
 
 #if USE_BME
 #include <BME280I2C.h>
@@ -74,18 +76,20 @@ void sleepDelay(uint16_t n)
   while (ticks--)
     sleep_cpu();
 
-  //RTC.PITCTRLA = 0;    /* Disable PIT counter, should not be done, erratum */
+  //RTC.PITCTRLA = 0;    /* Disable PIT counter, should not be done, see erratum */
   RTC.PITINTCTRL &= ~RTC_PI_bm;           /* PIT Interrupt: disabled */
 #else
   while (RTC.STATUS /* & RTC_CMPBUSY_bm */)  // Wait for new settings to synchronize
     ;
-  RTC.CMP = RTC.CNT + n * 33; // 33 results in 1.007ms delay instead of 1.0ms, using 32 would be worse: 0.977ms
+
+  uint32_t delay;
+  RTC.CMP = RTC.CNT + (delay = (n * 32UL) + uint16_t(n / 128 * 3)); // With this calculation every multiple of 128ms is exact!
+
   while (RTC.STATUS /* & RTC_CMPBUSY_bm */)  // Wait for new settings to synchronize
     ;
-
+  
+  sleep_cnt = delay / 65536 + 1; // Calculate number of wrap arounds (overflows)
   RTC.INTCTRL |= RTC_CMP_bm;
-  //sleep_cnt = n / 2048 + 1; // use this in combination with * 32
-  sleep_cnt = (n * 33UL) / 65536 + 1;
   while (sleep_cnt)
     sleep_cpu();
 
