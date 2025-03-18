@@ -1,3 +1,6 @@
+#include <Event.h>
+#include <Logic.h>
+
 #define led       PIN_PA7
 #define reset_ESP PIN_PB3
 
@@ -152,6 +155,12 @@ void blinkN(uint8_t n, uint8_t l = led)
 
 // the setup routine runs once when you press reset:
 void setup() {
+  // Serial.swap(1); // A1,A2 = TX,RX
+  // Serial.begin(9600);
+  // Serial.println("Start");
+  // while (1)
+  //   Serial.println(TCA0.SPLIT.HCNT);
+
   RTC_init();                           /* Initialize the RTC timer */
   #ifdef SLEEPINT
   set_sleep_mode(SLEEP_MODE_STANDBY);
@@ -179,29 +188,46 @@ void setup() {
   }
 
   sleepDelay(5000);
+
+  // pinMode(PIN_PA2, OUTPUT);
+  // Event0.set_generator(gen::rtc_ovf);
+  // Event0.set_user(user::evouta_pin_pa2);
+  // Event0.start();
+  // pinMode(PIN_PA7, OUTPUT);
+  // Logic1.enable = true;
+  // Logic1.input0 = logic::in::tca0;
+  // Logic1.input1 = logic::in::tca0;
+  // Logic1.input2 = logic::in::tca0;
+  // Logic1.output = logic::out::enable;
+  // Logic1.filter = logic::filter::disable;
+  // Logic1.truth = 0x55;
+  // Logic1.init();
+  // Logic1.start();
 }
 
 
 unsigned voltage;
 
+#if USE_ESP
 volatile unsigned cnt;
 
 // function that executes whenever data is requested by master
 // this function is registered as an event
 void requestEvent() {
   Wire.write(cnt >> 8);
-  Wire.write(cnt & 0xFF);
+  Wire.write(cnt & 0xF0);
   Wire.write(voltage >> 8);
   Wire.write(voltage & 0xFF);
 
   ++cnt;
 }
-
+#endif
 
 // the loop routine runs over and over again forever:
 void loop() {
 
   //unsigned int v = voltage = getBattery();
+
   unsigned int v = voltage = getBandgap();
   blinkN(v / 1000);
   sleepDelay(1500);
@@ -209,18 +235,18 @@ void loop() {
   sleepDelay(1500);
   blinkN((v % 100) / 10);
 
-  // for (byte l = 0; l < 300000 / (5000 + 2 + 700); l++) {  // 300s / delay per loop (5000 + blink time)
-  //   sleepDelay(5000);
-  //   blinkN(1);
-  // }
-  sleepDelay(2000);
+  // sleepDelay(5000);
+  // while (1)
+  //   digitalWriteFast(led, RTC.CNT & 1 ? HIGH: LOW);
+
+  sleepDelay(5000);
   for (int i= 1; i <= 10; i++) {
-    sleepDelay(1000);
+    sleepDelay(1);
     digitalWriteFast(led, HIGH);
-    sleepDelay(i * 100);
+    sleepDelay(i);
     digitalWriteFast(led, LOW);
   }
-  sleepDelay(20000);
+  sleepDelay(5000);
 
 #if USE_BME
   Wire.begin(1);                // join i2c bus with address #1
