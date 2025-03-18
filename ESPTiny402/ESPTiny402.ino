@@ -23,11 +23,7 @@ void RTC_init(void)
     ;                                   /* Wait for all register to be synchronized */
   RTC.CLKSEL = RTC_CLKSEL_INT32K_gc;    /* 32.768kHz Internal Ultra-Low-Power Oscillator (OSCULP32K) */
 
-  // RTC.PITCTRLA |= RTC_PITEN_bm; // PIT must be enabled, erratum?
   RTC.CTRLA |= RTC_RTCEN_bm | RTC_RUNSTDBY_bm;
-#ifndef SLEEPINT
-  RTC.PITINTCTRL = RTC_PI_bm;           /* PIT Interrupt: enabled */
-#endif
 }
 
 #ifdef SLEEPINT
@@ -70,22 +66,20 @@ void sleepDelay(uint16_t n)
     ;
 
   RTC.PITCTRLA = period | RTC_PITEN_bm;    // Enable PIT counter: enabled
-
-  while (RTC.PITSTATUS & RTC_CTRLBUSY_bm)  // Wait for new settings to synchronize
-    ;
+  RTC.PITINTCTRL |= RTC_PI_bm;             /* PIT Interrupt: enabled */
 
   while (ticks--)
     sleep_cpu();
 
-  RTC.PITCTRLA = 0;    /* Disable PIT counter */
+  //RTC.PITCTRLA = 0;    /* Disable PIT counter, should not be done, erratum */
+  RTC.PITINTCTRL &= ~RTC_PI_bm;           /* PIT Interrupt: disabled */
 #else
   while (RTC.STATUS /* & RTC_CMPBUSY_bm */)  // Wait for new settings to synchronize
     ;
   RTC.CMP = RTC.CNT + n * 32;
-  while (RTC.STATUS /* & RTC_CMPBUSY_bm*/)  // Wait for new settings to synchronize
-    ;
+
   RTC.INTCTRL |= RTC_CMP_bm;
-  sleep_cnt = n / 2048 + 1; // should be 2000, but we don't care for longer delays
+  sleep_cnt = n / 2048 + 1; // should be 2000, but we don't care for inaccurate oscillator
   while (sleep_cnt)
     sleep_cpu();
 
@@ -156,7 +150,11 @@ void blinkN(uint8_t n, uint8_t l = led)
 // the setup routine runs once when you press reset:
 void setup() {
   RTC_init();                           /* Initialize the RTC timer */
+  #ifdef SLEEPINT
   set_sleep_mode(SLEEP_MODE_STANDBY);
+  #else
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  #endif
   sleep_enable();                       /* Enable sleep mode, but not going to sleep yet */
 
   pinMode(PIN_PA1, INPUT_PULLUP);
