@@ -64,8 +64,8 @@ void sleepDelay(uint16_t n)
 
   while (RTC.PITSTATUS & RTC_CTRLBUSY_bm)  // Wait for new settings to synchronize
     ;
-
   RTC.PITCTRLA = period | RTC_PITEN_bm;    // Enable PIT counter: enabled
+ 
   RTC.PITINTCTRL |= RTC_PI_bm;             /* PIT Interrupt: enabled */
 
   while (ticks--)
@@ -76,10 +76,13 @@ void sleepDelay(uint16_t n)
 #else
   while (RTC.STATUS /* & RTC_CMPBUSY_bm */)  // Wait for new settings to synchronize
     ;
-  RTC.CMP = RTC.CNT + n * 32;
+  RTC.CMP = RTC.CNT + n * 33; // 33 results in 1.007ms delay instead of 1.0ms, using 32 would be worse: 0.977ms
+  while (RTC.STATUS /* & RTC_CMPBUSY_bm */)  // Wait for new settings to synchronize
+    ;
 
   RTC.INTCTRL |= RTC_CMP_bm;
-  sleep_cnt = n / 2048 + 1; // should be 2000, but we don't care for inaccurate oscillator
+  //sleep_cnt = n / 2048 + 1; // use this in combination with * 32
+  sleep_cnt = (n * 33UL) / 65536 + 1;
   while (sleep_cnt)
     sleep_cpu();
 
