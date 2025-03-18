@@ -89,9 +89,14 @@ void sleepDelay(uint16_t n)
     ;
   
   sleep_cnt = delay / 65536 + 1; // Calculate number of wrap arounds (overflows)
+  uint64_t start = millis();
   RTC.INTCTRL |= RTC_CMP_bm;
-  while (sleep_cnt)
+  while (sleep_cnt) {
     sleep_cpu();
+    if (sleep_cnt)
+      nudge_millis(2000);
+  }
+  set_millis(start + n);
 
   RTC.INTCTRL &= ~RTC_CMP_bm;
 #endif
