@@ -9,7 +9,7 @@
 #define USE_BME	0
 #define USE_ESP 0
 
-#define RTC_PERIOD	0x8000 // Overflow at 32767 ticks from RTC
+#define RTC_PERIOD	0x8000 // Overflow at 32768 ticks from RTC
 #define RTC_MILLIS	1000   // That matches 1000ms
 
 #if USE_ESP
@@ -22,15 +22,18 @@
 BME280I2C bme;
 #endif
 
-#define SLEEPINT
+#define SLEEPINT	// Do not count PIT interrupts but use RTC interrupt at exact time
 
 void RTC_init(void)
 {
   /* Initialize RTC: */
   while (RTC.STATUS > 0)
     ;                                   /* Wait for all register to be synchronized */
-  RTC.PER = RTC_PERIOD - 1;			/* 1 sec overflow */
+  RTC.PER = RTC_PERIOD - 1;		/* 1 sec overflow */
   RTC.CLKSEL = RTC_CLKSEL_INT32K_gc;    /* 32.768kHz Internal Ultra-Low-Power Oscillator (OSCULP32K) */
+
+  // For overflow ticks while sleeping:
+  // RTC.INTCTRL = RTC_OVF_bm;
 
   RTC.CTRLA |= RTC_RTCEN_bm | RTC_RUNSTDBY_bm;
 }
@@ -40,9 +43,14 @@ volatile uint8_t sleep_cnt;
 
 ISR(RTC_CNT_vect)
 {
-  RTC.INTFLAGS = RTC_CMP_bm;            /* Clear interrupt flag by writing '1' (required) */
-  sleep_cnt--;
-}
+  // if (RTC.INTFLAGS & RTC_CMP_bm) {
+    sleep_cnt--;
+    RTC.INTFLAGS = RTC_CMP_bm;          /* Clear interrupt flag by writing '1' (required) */
+  // }
+//   if (RTC.INTFLAGS & RTC_OVF_bm) {
+//     RTC.INTFLAGS = RTC_OVF_bm;          /* Clear interrupt flag by writing '1' (required) */
+//   }
+// }
 #else
 ISR(RTC_PIT_vect)
 {
