@@ -106,7 +106,7 @@ void sleepDelay(uint16_t n)
   while (RTC.STATUS /* & RTC_CMPBUSY_bm */)  // Wait for new settings to synchronize
     ;
   RTC.INTCTRL |= RTC_CMP_bm;  
-  uint8_t sleep_cnt = delay / RTC_PERIOD + 1; // Calculate number of wrap arounds (overflows)
+  sleep_cnt = delay / RTC_PERIOD + 1; // Calculate number of wrap arounds (overflows)
   uint64_t start = millis();
   while (sleep_cnt) {
     sleep_cpu();
