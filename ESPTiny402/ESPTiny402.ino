@@ -39,7 +39,7 @@ void RTC_init(void)
 }
 
 #ifdef SLEEPINT
-volatile uint8_t sleep_cnt;
+uint8_t sleep_cnt;
 
 ISR(RTC_CNT_vect)
 {
@@ -50,10 +50,15 @@ ISR(RTC_CNT_vect)
 //   if (RTC.INTFLAGS & RTC_OVF_bm) {
 //     RTC.INTFLAGS = RTC_OVF_bm;          /* Clear interrupt flag by writing '1' (required) */
 //   }
-// }
+}
 #else
+volatile uint16_t ticks;
+
 ISR(RTC_PIT_vect)
 {
+  if (ticks)
+    ticks--;
+
   RTC.PITINTFLAGS = RTC_PI_bm;          /* Clear interrupt flag by writing '1' (required) */
 }
 #endif
@@ -62,21 +67,21 @@ ISR(RTC_PIT_vect)
 void sleepDelay(uint16_t n)
 {
 #ifndef SLEEPINT
-  uint16_t ticks;
+  uint16_t cticks;
   uint8_t period;
 
   if (n < 100) {
       period = RTC_PERIOD_CYC8_gc; // 1/4 ms
-      ticks = (n << 2);
+      cticks = (n << 2);
   } else if (n < 1000) {
       period = RTC_PERIOD_CYC64_gc; // 2 ms
-      ticks = (n >> 1);
+      cticks = (n >> 1);
   } else if (n < 5000) {
       period = RTC_PERIOD_CYC1024_gc; // 32 ms
-      ticks = (n >> 5);
+      cticks = (n >> 5);
   } else {
       period = RTC_PERIOD_CYC8192_gc; // 256 ms
-      ticks = (n >> 8);
+      cticks = (n >> 8);
   }
 
   while (RTC.PITSTATUS & RTC_CTRLBUSY_bm)  // Wait for new settings to synchronize
@@ -84,8 +89,9 @@ void sleepDelay(uint16_t n)
   RTC.PITCTRLA = period | RTC_PITEN_bm;    // Enable PIT counter: enabled
  
   RTC.PITINTCTRL |= RTC_PI_bm;             /* PIT Interrupt: enabled */
+  ticks = cticks;
 
-  while (ticks--)
+  while (ticks)
     sleep_cpu();
 
   //RTC.PITCTRLA = 0;    /* Disable PIT counter, should not be done, see erratum */
@@ -95,14 +101,13 @@ void sleepDelay(uint16_t n)
     ;
 
   uint32_t delay;
-  RTC.CMP = RTC.CNT + (delay = (n * 32UL) + uint16_t(n / 128 * 3)); // With this calculation every multiple of 128ms is exact!
+  RTC.CMP = (RTC.CNT + (delay = (n * 32UL) + uint16_t(n / 128 * 3))) & (RTC_PERIOD-1); // With this calculation every multiple of 128ms is exact!
 
   while (RTC.STATUS /* & RTC_CMPBUSY_bm */)  // Wait for new settings to synchronize
     ;
-  
-  sleep_cnt = delay / RTC_PERIOD + 1; // Calculate number of wrap arounds (overflows)
+  RTC.INTCTRL |= RTC_CMP_bm;  
+  uint8_t sleep_cnt = delay / RTC_PERIOD + 1; // Calculate number of wrap arounds (overflows)
   uint64_t start = millis();
-  RTC.INTCTRL |= RTC_CMP_bm;
   while (sleep_cnt) {
     sleep_cpu();
     if (sleep_cnt)
