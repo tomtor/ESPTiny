@@ -9,6 +9,9 @@
 #define USE_BME	0
 #define USE_ESP 0
 
+#define RTC_PERIOD	0x8000 // Overflow at 32767 ticks from RTC
+#define RTC_MILLIS	1000   // That matches 1000ms
+
 #if USE_ESP
 #include <Wire.h>
 #endif
@@ -26,6 +29,7 @@ void RTC_init(void)
   /* Initialize RTC: */
   while (RTC.STATUS > 0)
     ;                                   /* Wait for all register to be synchronized */
+  RTC.PER = RTC_PERIOD - 1;			/* 1 sec overflow */
   RTC.CLKSEL = RTC_CLKSEL_INT32K_gc;    /* 32.768kHz Internal Ultra-Low-Power Oscillator (OSCULP32K) */
 
   RTC.CTRLA |= RTC_RTCEN_bm | RTC_RUNSTDBY_bm;
@@ -88,13 +92,13 @@ void sleepDelay(uint16_t n)
   while (RTC.STATUS /* & RTC_CMPBUSY_bm */)  // Wait for new settings to synchronize
     ;
   
-  sleep_cnt = delay / 65536 + 1; // Calculate number of wrap arounds (overflows)
+  sleep_cnt = delay / RTC_PERIOD + 1; // Calculate number of wrap arounds (overflows)
   uint64_t start = millis();
   RTC.INTCTRL |= RTC_CMP_bm;
   while (sleep_cnt) {
     sleep_cpu();
     if (sleep_cnt)
-      nudge_millis(2000);
+      nudge_millis(RTC_MILLIS);
   }
   set_millis(start + n);
 
