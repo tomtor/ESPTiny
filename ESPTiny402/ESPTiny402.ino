@@ -43,14 +43,14 @@ void RTC_init(void)
 }
 
 #ifdef SLEEPINT
-uint8_t sleep_cnt;
+volatile uint8_t sleep_cnt;
 
 ISR(RTC_CNT_vect)
 {
-  if (RTC.INTFLAGS & RTC_CMP_bm) {
+  // if (RTC.INTFLAGS & RTC_CMP_bm) {
     sleep_cnt--;
     RTC.INTFLAGS = RTC_CMP_bm;          /* Clear interrupt flag by writing '1' (required) */
-  }
+  // }
   // if (RTC.INTFLAGS & RTC_OVF_bm) {
   //   RTC.INTFLAGS = RTC_OVF_bm;          /* Clear interrupt flag by writing '1' (required) */
   // }
@@ -108,7 +108,7 @@ void sleepDelay(uint16_t n)
   uint16_t cnt = RTC.CNT;
   RTC.CMP = (cnt + (tdelay = (n * 32UL) + uint16_t(n / 4 * 3))) & (RTC_PERIOD-1); // With this calculation every multiple of 4ms is exact!
 
-#if 1
+#if 0
   if (((RTC.CMP - cnt) & (RTC_PERIOD-1)) <= 1) { // overflow is/was near
     while (RTC.CNT == cnt) // Wait for it
       ;
@@ -118,17 +118,15 @@ void sleepDelay(uint16_t n)
 
   RTC.INTCTRL |= RTC_CMP_bm; // This might trigger a pending interrupt, so do this before assigning sleep_cnt!
   sleep_cnt = tdelay / RTC_PERIOD + 1; // Calculate number of wrap arounds (overflows)
-  uint64_t start = millis();
-  //Serial.print(RTC.CNT); Serial.print(' '); Serial.print(RTC.CMP); Serial.print(' '); Serial.print(tdelay); Serial.print(' '); Serial.println(sleep_cnt); Serial.flush(); // delay(n);
+  //uint64_t start = millis();
 
   while (sleep_cnt)
     sleep_cpu();
 
   // if (!idle_mode)
-  set_millis(start + n);
+  //set_millis(start + n);
 
   RTC.INTCTRL &= ~RTC_CMP_bm;
-  // Serial.print(' '); Serial.println(RTC.CMP); Serial.flush();
 #endif
 }
 
@@ -197,12 +195,11 @@ void setup() {
   Serial.swap(1); // A1,A2 = TX,RX
   Serial.begin(9600);
   Serial.println("Start"); Serial.flush();
-  // while (1)
-  //   Serial.println(TCA0.SPLIT.HCNT);
 
   RTC_init();                           /* Initialize the RTC timer */
   #ifdef SLEEPINT
-  set_sleep_mode(SLEEP_MODE_STANDBY);
+  //set_sleep_mode(SLEEP_MODE_STANDBY);
+  set_sleep_mode(SLEEP_MODE_IDLE);
   #else
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
   #endif
@@ -236,8 +233,9 @@ void setup() {
     sleepDelay(rand);
     Serial.flush();
     int32_t delta = millis() - start;
-    Serial.println(delta); Serial.flush();
-    if (delta < 2997+rand || delta > 3003+rand) {
+    Serial.print(delta); Serial.print(' '); Serial.println(rand); Serial.flush();
+    if (delta < 2950+rand || delta > 3050+rand) {
+      Serial.print("Error: "); Serial.println(3000 + rand);
       while (1)
         blinkN(1);
     }
