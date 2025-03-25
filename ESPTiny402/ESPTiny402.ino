@@ -36,6 +36,10 @@ void RTC_init(void)
   // RTC.INTCTRL = RTC_OVF_bm;
 
   RTC.CTRLA |= RTC_RTCEN_bm | RTC_RUNSTDBY_bm;
+
+#ifndef SLEEPINT
+  RTC.PITCTRLA = RTC_PITEN_bm;    /* Disable PIT counter, should not be done, see erratum */
+#endif
 }
 
 #ifdef SLEEPINT
@@ -43,13 +47,13 @@ uint8_t sleep_cnt;
 
 ISR(RTC_CNT_vect)
 {
-  // if (RTC.INTFLAGS & RTC_CMP_bm) {
+  if (RTC.INTFLAGS & RTC_CMP_bm) {
     sleep_cnt--;
     RTC.INTFLAGS = RTC_CMP_bm;          /* Clear interrupt flag by writing '1' (required) */
+  }
+  // if (RTC.INTFLAGS & RTC_OVF_bm) {
+  //   RTC.INTFLAGS = RTC_OVF_bm;          /* Clear interrupt flag by writing '1' (required) */
   // }
-//   if (RTC.INTFLAGS & RTC_OVF_bm) {
-//     RTC.INTFLAGS = RTC_OVF_bm;          /* Clear interrupt flag by writing '1' (required) */
-//   }
 }
 #else
 volatile uint16_t ticks;
@@ -100,19 +104,31 @@ void sleepDelay(uint16_t n)
   while (RTC.STATUS /* & RTC_CMPBUSY_bm */)  // Wait for new settings to synchronize
     ;
 
-  uint32_t delay;
-  RTC.CMP = (RTC.CNT + (delay = (n * 32UL) + uint16_t(n / 128 * 3))) & (RTC_PERIOD-1); // With this calculation every multiple of 128ms is exact!
+  uint32_t tdelay;
+  uint16_t cnt = RTC.CNT;
+  RTC.CMP = (cnt + (tdelay = (n * 32UL) + uint16_t(n / 4 * 3))) & (RTC_PERIOD-1); // With this calculation every multiple of 4ms is exact!
 
-  while (RTC.STATUS /* & RTC_CMPBUSY_bm */)  // Wait for new settings to synchronize
-    ;
-  RTC.INTCTRL |= RTC_CMP_bm;  
-  sleep_cnt = delay / RTC_PERIOD + 1; // Calculate number of wrap arounds (overflows)
+#if 1
+  if (((RTC.CMP - cnt) & (RTC_PERIOD-1)) <= 1) { // overflow is/was near
+    while (RTC.CNT == cnt) // Wait for it
+      ;
+    tdelay -= RTC_PERIOD;
+  }
+#endif
+
+  RTC.INTCTRL |= RTC_CMP_bm; // This might trigger a pending interrupt, so do this before assigning sleep_cnt!
+  sleep_cnt = tdelay / RTC_PERIOD + 1; // Calculate number of wrap arounds (overflows)
   uint64_t start = millis();
+  //Serial.print(RTC.CNT); Serial.print(' '); Serial.print(RTC.CMP); Serial.print(' '); Serial.print(tdelay); Serial.print(' '); Serial.println(sleep_cnt); Serial.flush(); // delay(n);
+
   while (sleep_cnt)
     sleep_cpu();
+
+  // if (!idle_mode)
   set_millis(start + n);
 
   RTC.INTCTRL &= ~RTC_CMP_bm;
+  // Serial.print(' '); Serial.println(RTC.CMP); Serial.flush();
 #endif
 }
 
@@ -178,9 +194,9 @@ void blinkN(uint8_t n, uint8_t l = led)
 
 // the setup routine runs once when you press reset:
 void setup() {
-  // Serial.swap(1); // A1,A2 = TX,RX
-  // Serial.begin(9600);
-  // Serial.println("Start");
+  Serial.swap(1); // A1,A2 = TX,RX
+  Serial.begin(9600);
+  Serial.println("Start"); Serial.flush();
   // while (1)
   //   Serial.println(TCA0.SPLIT.HCNT);
 
@@ -192,8 +208,8 @@ void setup() {
   #endif
   sleep_enable();                       /* Enable sleep mode, but not going to sleep yet */
 
-  pinMode(PIN_PA1, INPUT_PULLUP);
-  pinMode(PIN_PA2, INPUT_PULLUP);
+  // pinMode(PIN_PA1, INPUT_PULLUP);
+  // pinMode(PIN_PA2, INPUT_PULLUP);
   pinMode(PIN_PA3, INPUT_PULLUP);
   //  pinMode(PIN_PA4, INPUT_PULLUP);
   //  pinMode(PIN_PA5, INPUT_PULLUP);
@@ -205,9 +221,26 @@ void setup() {
   //  pinMode(PIN_PB3, INPUT_PULLUP);
 
   pinMode(led, OUTPUT);
+  //Serial.println("Blink"); Serial.flush();
 
   for (byte i = 0; i < 3; i++) {
     blinkN(1, led);
+  }
+
+  while (1){
+    uint32_t start = millis();
+    sleepDelay(999);
+    sleepDelay(1000);
+    sleepDelay(1001);
+    int rand = random(1,1000);
+    sleepDelay(rand);
+    Serial.flush();
+    int32_t delta = millis() - start;
+    Serial.println(delta); Serial.flush();
+    if (delta < 2997+rand || delta > 3003+rand) {
+      while (1)
+        blinkN(1);
+    }
   }
 
   sleepDelay(5000);
