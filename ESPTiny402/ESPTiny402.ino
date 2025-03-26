@@ -3,7 +3,7 @@
 
 #include <avr/sleep.h>
 
-#define led       PIN_PA7
+#define LED       PIN_PA7
 #define reset_ESP PIN_PB3
 
 #define USE_BME	0
@@ -101,6 +101,7 @@ void sleepDelay(uint16_t n)
   //RTC.PITCTRLA = 0;    /* Disable PIT counter, should not be done, see erratum */
   RTC.PITINTCTRL &= ~RTC_PI_bm;           /* PIT Interrupt: disabled */
 #else
+  //digitalWriteFast(LED, HIGH);
   while (RTC.STATUS /* & RTC_CMPBUSY_bm */)  // Wait for new settings to synchronize
     ;
 
@@ -127,6 +128,7 @@ void sleepDelay(uint16_t n)
   //set_millis(start + n);
 
   RTC.INTCTRL &= ~RTC_CMP_bm;
+  //digitalWriteFast(LED, LOW);
 #endif
 }
 
@@ -179,7 +181,7 @@ unsigned int getBattery ()
 #endif
 
 
-void blinkN(uint8_t n, uint8_t l = led)
+void blinkN(uint8_t n, uint8_t l = LED)
 {
   for (uint8_t i = 0; i < n; i++) {
     digitalWriteFast(l, HIGH);
@@ -197,12 +199,12 @@ void setup() {
   Serial.println("Start"); Serial.flush();
 
   RTC_init();                           /* Initialize the RTC timer */
-  #ifdef SLEEPINT
-  //set_sleep_mode(SLEEP_MODE_STANDBY);
-  set_sleep_mode(SLEEP_MODE_IDLE);
-  #else
+#ifdef SLEEPINT
+  set_sleep_mode(SLEEP_MODE_STANDBY);
+  //set_sleep_mode(SLEEP_MODE_IDLE);
+#else
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-  #endif
+#endif
   sleep_enable();                       /* Enable sleep mode, but not going to sleep yet */
 
   // pinMode(PIN_PA1, INPUT_PULLUP);
@@ -217,28 +219,11 @@ void setup() {
   //  pinMode(PIN_PB2, INPUT_PULLUP);
   //  pinMode(PIN_PB3, INPUT_PULLUP);
 
-  pinMode(led, OUTPUT);
+  pinMode(LED, OUTPUT);
   //Serial.println("Blink"); Serial.flush();
 
   for (byte i = 0; i < 3; i++) {
-    blinkN(1, led);
-  }
-
-  while (1){
-    uint32_t start = millis();
-    sleepDelay(999);
-    sleepDelay(1000);
-    sleepDelay(1001);
-    int rand = random(1,1000);
-    sleepDelay(rand);
-    Serial.flush();
-    int32_t delta = millis() - start;
-    Serial.print(delta); Serial.print(' '); Serial.println(rand); Serial.flush();
-    if (delta < 2950+rand || delta > 3050+rand) {
-      Serial.print("Error: "); Serial.println(3000 + rand);
-      while (1)
-        blinkN(1);
-    }
+    blinkN(1, LED);
   }
 
   sleepDelay(5000);
@@ -296,9 +281,9 @@ void loop() {
   sleepDelay(5000);
   for (int i= 1; i <= 10; i++) {
     sleepDelay(1);
-    digitalWriteFast(led, HIGH);
+    digitalWriteFast(LED, HIGH);
     sleepDelay(i);
-    digitalWriteFast(led, LOW);
+    digitalWriteFast(LED, LOW);
   }
   sleepDelay(5000);
 
