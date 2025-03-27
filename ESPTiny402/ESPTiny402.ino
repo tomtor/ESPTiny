@@ -3,7 +3,7 @@
 
 #include <avr/sleep.h>
 
-#define LED       PIN_PA7
+#define led       PIN_PA7
 #define reset_ESP PIN_PB3
 
 #define USE_BME	0
@@ -101,22 +101,27 @@ void sleepDelay(uint16_t n)
   //RTC.PITCTRLA = 0;    /* Disable PIT counter, should not be done, see erratum */
   RTC.PITINTCTRL &= ~RTC_PI_bm;           /* PIT Interrupt: disabled */
 #else
-  //digitalWriteFast(LED, HIGH);
   while (RTC.STATUS /* & RTC_CMPBUSY_bm */)  // Wait for new settings to synchronize
     ;
 
   uint32_t tdelay;
+  noInterrupts();
   uint16_t cnt = RTC.CNT;
   RTC.CMP = (cnt + (tdelay = (n * 32UL) + uint16_t(n / 4 * 3))) & (RTC_PERIOD-1); // With this calculation every multiple of 4ms is exact!
+  // Note 20011 ms = 655360 ticks = 20 overflows exactly, so CMP will be set to the current CNT and this works OK
+  // 9005 will set CMP to CNT+1
 
-#if 0
-  if (((RTC.CMP - cnt) & (RTC_PERIOD-1)) <= 1) { // overflow is/was near
-    while (RTC.CNT == cnt) // Wait for it
+#if 1
+  if (RTC.CNT == RTC.CMP) {
+    tdelay -= RTC_PERIOD;
+  } else if (((RTC.CMP - cnt) & (RTC_PERIOD-1)) <= 2) { // overflow is/was near, 4Mhz clock or faster
+    while (RTC.CNT != RTC.CMP) // Wait for it...
       ;
     tdelay -= RTC_PERIOD;
   }
 #endif
 
+  interrupts();
   RTC.INTCTRL |= RTC_CMP_bm; // This might trigger a pending interrupt, so do this before assigning sleep_cnt!
   sleep_cnt = tdelay / RTC_PERIOD + 1; // Calculate number of wrap arounds (overflows)
   //uint64_t start = millis();
@@ -128,7 +133,6 @@ void sleepDelay(uint16_t n)
   //set_millis(start + n);
 
   RTC.INTCTRL &= ~RTC_CMP_bm;
-  //digitalWriteFast(LED, LOW);
 #endif
 }
 
@@ -181,7 +185,7 @@ unsigned int getBattery ()
 #endif
 
 
-void blinkN(uint8_t n, uint8_t l = LED)
+void blinkN(uint8_t n, uint8_t l = led)
 {
   for (uint8_t i = 0; i < n; i++) {
     digitalWriteFast(l, HIGH);
@@ -194,21 +198,21 @@ void blinkN(uint8_t n, uint8_t l = LED)
 
 // the setup routine runs once when you press reset:
 void setup() {
-  Serial.swap(1); // A1,A2 = TX,RX
-  Serial.begin(9600);
-  Serial.println("Start"); Serial.flush();
+  // Serial.swap(1); // A1,A2 = TX,RX
+  // Serial.begin(9600);
+  // Serial.println("Start"); Serial.flush();
 
   RTC_init();                           /* Initialize the RTC timer */
-#ifdef SLEEPINT
+  #ifdef SLEEPINT
   set_sleep_mode(SLEEP_MODE_STANDBY);
-  //set_sleep_mode(SLEEP_MODE_IDLE);
-#else
+  // set_sleep_mode(SLEEP_MODE_IDLE);
+  #else
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-#endif
+  #endif
   sleep_enable();                       /* Enable sleep mode, but not going to sleep yet */
 
-  // pinMode(PIN_PA1, INPUT_PULLUP);
-  // pinMode(PIN_PA2, INPUT_PULLUP);
+  pinMode(PIN_PA1, INPUT_PULLUP);
+  pinMode(PIN_PA2, INPUT_PULLUP);
   pinMode(PIN_PA3, INPUT_PULLUP);
   //  pinMode(PIN_PA4, INPUT_PULLUP);
   //  pinMode(PIN_PA5, INPUT_PULLUP);
@@ -219,12 +223,36 @@ void setup() {
   //  pinMode(PIN_PB2, INPUT_PULLUP);
   //  pinMode(PIN_PB3, INPUT_PULLUP);
 
-  pinMode(LED, OUTPUT);
+  pinMode(led, OUTPUT);
   //Serial.println("Blink"); Serial.flush();
 
   for (byte i = 0; i < 3; i++) {
-    blinkN(1, LED);
+    blinkN(1, led);
   }
+
+#if 0
+ while (1) {
+    uint16_t testn;
+    switch (millis() & 0x03) {
+      case 0: testn = 9005; break;
+      case 1: testn = 29016; break;
+      case 2: testn = 20011; break;
+      default:
+          testn = random(500, 2500);
+    }
+    uint32_t start = millis();
+    sleepDelay(testn);
+    // int rand = random(1,1000);
+    // sleepDelay(rand);
+    // Serial.flush();
+    int32_t delta = millis() - start;
+    Serial.printf("%ld %d\r\n", delta, testn); Serial.flush();
+    if (delta < testn - 500 || delta > testn + 500) {
+      Serial.println("Error"); Serial.flush();
+      while (1) blinkN(1);
+    }
+  }
+#endif
 
   sleepDelay(5000);
 
@@ -281,9 +309,9 @@ void loop() {
   sleepDelay(5000);
   for (int i= 1; i <= 10; i++) {
     sleepDelay(1);
-    digitalWriteFast(LED, HIGH);
+    digitalWriteFast(led, HIGH);
     sleepDelay(i);
-    digitalWriteFast(LED, LOW);
+    digitalWriteFast(led, LOW);
   }
   sleepDelay(5000);
 
