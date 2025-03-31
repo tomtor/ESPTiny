@@ -24,6 +24,7 @@ BME280I2C bme;
 
 #define SLEEPINT	// Do not count PIT interrupts but use RTC interrupt at exact time
 
+
 void RTC_init(void)
 {
   /* Initialize RTC: */
@@ -111,7 +112,6 @@ void sleepDelay(uint16_t n)
   // Note 20011 ms = 655360 ticks = 20 overflows exactly, so CMP will be set to the current CNT and this works OK
   // 9005 will set CMP to CNT+1
 
-#if 1
   if (RTC.CNT == RTC.CMP) {
     tdelay -= RTC_PERIOD;
   } else if (((RTC.CMP - cnt) & (RTC_PERIOD-1)) <= 2) { // overflow is/was near, 4Mhz clock or faster
@@ -119,17 +119,19 @@ void sleepDelay(uint16_t n)
       ;
     tdelay -= RTC_PERIOD;
   }
-#endif
 
-  interrupts();
-  RTC.INTCTRL |= RTC_CMP_bm; // This might trigger a pending interrupt, so do this before assigning sleep_cnt!
+#if RTC_PERIOD != 0x8000
   sleep_cnt = tdelay / RTC_PERIOD + 1; // Calculate number of wrap arounds (overflows)
-  //uint64_t start = millis();
-
-  while (sleep_cnt)
+#else
+  sleep_cnt = 2 * (tdelay >> 16) + ((tdelay & 0x8000) ? 2 : 1); // 10 times faster...
+#endif
+  RTC.INTFLAGS = RTC_CMP_bm; // Clear interrupt flag by writing '1'
+  RTC.INTCTRL |= RTC_CMP_bm;
+  interrupts();
+  uint64_t start = millis();
+  while (sleep_cnt) {
     sleep_cpu();
-
-  // if (!idle_mode)
+  }
   //set_millis(start + n);
 
   RTC.INTCTRL &= ~RTC_CMP_bm;
@@ -198,20 +200,20 @@ void blinkN(uint8_t n, uint8_t l = led)
 
 // the setup routine runs once when you press reset:
 void setup() {
-  // Serial.swap(1); // A1,A2 = TX,RX
-  // Serial.begin(9600);
-  // Serial.println("Start"); Serial.flush();
+  Serial.swap(1); // A1,A2 = TX,RX
+  Serial.begin(9600);
+  Serial.println("Start"); Serial.flush();
 
   RTC_init();                           /* Initialize the RTC timer */
   #ifdef SLEEPINT
   set_sleep_mode(SLEEP_MODE_STANDBY);
-  // set_sleep_mode(SLEEP_MODE_IDLE);
+  // set_sleep_mode(SLEEP_MODE_IDLE); // Uncomment when testing
   #else
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
   #endif
   sleep_enable();                       /* Enable sleep mode, but not going to sleep yet */
 
-  pinMode(PIN_PA1, INPUT_PULLUP);
+  // pinMode(PIN_PA1, INPUT_PULLUP);
   pinMode(PIN_PA2, INPUT_PULLUP);
   pinMode(PIN_PA3, INPUT_PULLUP);
   //  pinMode(PIN_PA4, INPUT_PULLUP);
@@ -240,13 +242,14 @@ void setup() {
       default:
           testn = random(500, 2500);
     }
+    //Serial.println(testn); Serial.flush();
     uint32_t start = millis();
     sleepDelay(testn);
     // int rand = random(1,1000);
     // sleepDelay(rand);
     // Serial.flush();
     int32_t delta = millis() - start;
-    Serial.printf("%ld %d\r\n", delta, testn); Serial.flush();
+    Serial.print(delta); Serial.print(' '); Serial.println(testn); Serial.flush();
     if (delta < testn - 500 || delta > testn + 500) {
       Serial.println("Error"); Serial.flush();
       while (1) blinkN(1);
