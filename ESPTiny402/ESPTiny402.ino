@@ -3,6 +3,8 @@
 
 #include <avr/sleep.h>
 
+#define TEST_TIME 0
+
 #define led       PIN_PA7
 #define reset_ESP PIN_PB3
 
@@ -132,7 +134,11 @@ void sleepDelay(uint16_t n)
   while (sleep_cnt) {
     sleep_cpu();
   }
-  //set_millis(start + n);
+#if !TEST_TIME
+  noInterrupts();
+  set_millis(start + n);
+  interrupts();
+#endif
 
   RTC.INTCTRL &= ~RTC_CMP_bm;
 #endif
@@ -205,12 +211,15 @@ void setup() {
   Serial.println("Start"); Serial.flush();
 
   RTC_init();                           /* Initialize the RTC timer */
-  #ifdef SLEEPINT
+#ifdef SLEEPINT
+#if TEST_TIME
+  set_sleep_mode(SLEEP_MODE_IDLE);
+#else
   set_sleep_mode(SLEEP_MODE_STANDBY);
-  // set_sleep_mode(SLEEP_MODE_IDLE); // Uncomment when testing
-  #else
+#endif
+#else
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-  #endif
+#endif
   sleep_enable();                       /* Enable sleep mode, but not going to sleep yet */
 
   // pinMode(PIN_PA1, INPUT_PULLUP);
@@ -232,10 +241,11 @@ void setup() {
     blinkN(1, led);
   }
 
-#if 0
+#if TEST_TIME
  while (1) {
+    blinkN(1);
     uint16_t testn;
-    switch (millis() & 0x03) {
+    switch (random() & 0x07) {
       case 0: testn = 9005; break;
       case 1: testn = 29016; break;
       case 2: testn = 20011; break;
