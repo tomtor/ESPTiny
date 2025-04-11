@@ -5,7 +5,7 @@
 The main function of the ATtiny is acting as a battery friendly low power co-processor for the ESP.
 A bit like the ULP low power co-processor of the ESP32, except with a lot more IO functions and program memory.
 
-ATtiny and ESP combined use 12uA in sleep mode or even less when the ESP
+ATtiny and ESP combined use 22uA in sleep mode or even less when the ESP
 is switched off by the ATtiny with CS.
 
 ![3D rendering](ESPTiny.png)
